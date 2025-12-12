@@ -1,0 +1,25 @@
+# Зависимости
+node_modules/
+vendor/
+__pycache__/
+*.pyc
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Файлы IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Логи и временные файлы
+*.log
+*.tmp
+*.temp
+
+# Конфиденциальные данные
+.env
+.env.local
+config/secrets.yml
