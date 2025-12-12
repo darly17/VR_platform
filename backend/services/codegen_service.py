@@ -264,7 +264,7 @@ class CSharpGenerationStrategy:
     def generate_from_visual_script(self, visual_script: VisualScript) -> str:
         code_lines = [
             "// Генерация C# кода из визуального скрипта",
-            $"// Название: {visual_script.name}",
+            f"// Название: {visual_script.name}",
             "",
             "using System;",
             "using System.Collections.Generic;",
@@ -284,7 +284,7 @@ class CSharpGenerationStrategy:
             "            ",
             "            foreach (var log in executionLog)",
             "            {",
-            "                Console.WriteLine($\"  - {log}\");",
+            "                Console.WriteLine(f\"  - {log}\");",
             "            }",
             "        }",
             "",
@@ -314,7 +314,7 @@ class CSharpGenerationStrategy:
     def generate_from_scenario(self, scenario: Scenario) -> str:
         code_lines = [
             "// Генерация C# кода из сценария",
-            $"// Название: {scenario.name}",
+            f"// Название: {scenario.name}",
             "",
             "using System;",
             "using System.Collections.Generic;",
@@ -517,7 +517,7 @@ class CppGenerationStrategy:
             code_lines.append(f"        transitions[\"{transition.id}\"] = {{")
             code_lines.append(f"            .sourceStateId = \"{transition.source_state_id}\",")
             code_lines.append(f"            .targetStateId = \"{transition.target_state_id}\",")
-            code_lines.append(f"            .condition = \"{transition.condition or \"\"}\",")
+            code_lines.append(f"            .condition = \"{transition.condition}\",")
             code_lines.append(f"            .priority = {transition.priority}")
             code_lines.append("        };")
         

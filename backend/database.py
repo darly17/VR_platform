@@ -1,7 +1,7 @@
 """
 Настройки базы данных SQLite с SQLAlchemy
 """
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import create_engine, MetaData, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from typing import Generator
@@ -70,7 +70,8 @@ def check_db_connection():
     """
     try:
         with engine.connect() as conn:
-            result = conn.execute("SELECT 1")
+            # Исправленный запрос для SQLite
+            result = conn.execute(text("SELECT 1"))
             return True, "✅ Подключение к базе данных успешно"
     except Exception as e:
         return False, f"❌ Ошибка подключения: {e}"

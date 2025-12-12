@@ -1,7 +1,7 @@
 """
 Модель проекта из UML диаграммы
 """
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Table
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Table,JSON
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
 import uuid

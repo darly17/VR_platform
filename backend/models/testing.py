@@ -2,7 +2,7 @@
 Модели тестирования из UML диаграммы
 TestRun, TestResult, Device
 """
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, Float, Boolean, JSON
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, Float, Boolean, JSON, Table
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
 import uuid
@@ -18,6 +18,7 @@ test_run_devices = Table(
     Column('device_id', String(36), ForeignKey('devices.id'), primary_key=True),
     Column('assigned_at', DateTime(timezone=True), server_default=func.now())
 )
+
 
 class TestRun(Base):
     """Класс ТестовыйПрогон из UML"""
@@ -453,7 +454,8 @@ class BugReport(Base):
     scenario = relationship("Scenario")
     test_run = relationship("TestRun", back_populates="bug_reports")
     reporter = relationship("User", foreign_keys=[reporter_id], back_populates="reported_bugs")
-    assignee = relationship("User", foreign_keys=[assigned_to])
+    assignee = relationship("User", foreign_keys=[assigned_to], 
+                      remote_side="User.id")
     
     def __repr__(self):
         return f"<BugReport {self.title} ({self.status})>"

@@ -352,4 +352,4 @@ class AssetFileHandler(FileHandler):
             logger.error(f"Ошибка получения превью: {e}")
             return None
     
-    def extract_asset_metadata(self, asset_path: str, asset_type: str)
+    # def extract_asset_metadata(self, asset_path: str, asset_type: str)

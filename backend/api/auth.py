@@ -313,7 +313,7 @@ async def deactivate_user(user_id: str,
         "success": True,
         "message": "Пользователь деактивирован"
     }
-
+  
 @router.put("/users/{user_id}/activate")
 async def activate_user(user_id: str,
                        current_user: Dict[str, Any] = Depends(get_current_user),
@@ -342,3 +342,52 @@ async def activate_user(user_id: str,
         "success": True,
         "message": "Пользователь активирован"
     }
+
+@router.post("/login")
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db)
+):
+    user_service = UserService(db)
+    
+    user = user_service.get_user_by_username(form_data.username)
+    if not user:
+        user = user_service.get_user_by_email(form_data.username)
+    
+    if not user or not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверное имя пользователя или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    # Проверка пароля (нужна функция verify_password)
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+    
+    if not pwd_context.verify(form_data.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Неверное имя пользователя или пароль",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
+    access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": str(user.id), "username": user.username, "role": user.role.value},
+        expires_delta=access_token_expires
+    )
+    
+    return {
+        "success": True,
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "role": user.role.value,
+            "full_name": user.full_name
+        }
+    }
+  

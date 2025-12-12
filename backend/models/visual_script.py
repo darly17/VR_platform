@@ -10,14 +10,6 @@ import uuid
 from backend.database import Base
 from backend.models.enums import NodeType, ConnectionType
 
-# Таблица для связи Scenario - Asset
-scenario_assets = Table(
-    'scenario_assets',
-    Base.metadata,
-    Column('scenario_id', String(36), ForeignKey('scenarios.id'), primary_key=True),
-    Column('asset_id', String(36), ForeignKey('assets.id'), primary_key=True),
-    Column('assigned_at', DateTime(timezone=True), server_default=func.now())
-)
 
 class VisualScript(Base):
     """Класс ВизуальныйСкрипт из UML"""
@@ -35,7 +27,7 @@ class VisualScript(Base):
     version = Column(String(20), default="1.0.0")
     is_template = Column(Boolean, default=False)
     settings = Column(JSON, default=dict)
-    metadata = Column(JSON, default=dict)
+    script_metadata = Column("script_metadata", JSON, default=dict)  # Переименовано!
     
     # Связи из UML диаграммы
     # Scenario "1" *-- "0..1" VisualScript : описывается
@@ -121,7 +113,8 @@ class VisualScript(Base):
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
             "nodes_count": len(self.nodes),
             "connections_count": len(self.connections),
-            "is_template": self.is_template
+            "is_template": self.is_template,
+            "metadata": self.script_metadata  # Используем переименованное поле
         }
     
     def get_graph_data(self):
@@ -165,7 +158,7 @@ class Node(Base):
     description = Column(Text)
     properties = Column(JSON, default=dict)
     settings = Column(JSON, default=dict)
-    metadata = Column(JSON, default=dict)
+    node_metadata = Column("node_metadata", JSON, default=dict)  # Переименовано!
     
     # Связи из UML диаграммы
     # VisualScript "1" *-- "1..*" Node : содержит
@@ -222,7 +215,8 @@ class Node(Base):
             "description": self.description,
             "properties": self.properties,
             "source_connections_count": len(self.source_connections),
-            "target_connections_count": len(self.target_connections)
+            "target_connections_count": len(self.target_connections),
+            "metadata": self.node_metadata  # Используем переименованное поле
         }
     
     def move(self, new_position):

@@ -2,42 +2,13 @@
 Модели сценария из UML диаграммы
 Scenario (реализует IScenario), State, Transition
 """
-from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, Float, Boolean, JSON
+from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, Float, Boolean, JSON, Table
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
-from sqlalchemy.ext.declarative import declarative_base
 import uuid
-from abc import ABC, abstractmethod
 
 from backend.database import Base
 from backend.models.enums import StateType
-
-# Интерфейсы из UML (абстрактные классы)
-class IInteractiveObject(ABC):
-    """Интерфейс интерактивного объекта из UML"""
-    @abstractmethod
-    def interact(self):
-        """Взаимодействовать с объектом"""
-        pass
-    
-    @abstractmethod
-    def get_state(self):
-        """Получить состояние объекта"""
-        pass
-
-
-class IScenario(ABC):
-    """Интерфейс сценария из UML"""
-    @abstractmethod
-    def execute(self):
-        """Выполнить сценарий"""
-        pass
-    
-    @abstractmethod
-    def validate(self):
-        """Валидировать сценарий"""
-        pass
-
 
 # Таблица для утверждения сценариев менеджерами
 scenario_approvals = Table(
@@ -49,8 +20,18 @@ scenario_approvals = Table(
     Column('comments', Text)
 )
 
-class Scenario(Base, IScenario):
-    """Класс Сценарий из UML (реализует IScenario)"""
+# Таблица для связи Scenario - Asset
+scenario_assets = Table(
+    'scenario_assets',
+    Base.metadata,
+    Column('scenario_id', String(36), ForeignKey('scenarios.id'), primary_key=True),
+    Column('asset_id', String(36), ForeignKey('assets.id'), primary_key=True),
+    Column('assigned_at', DateTime(timezone=True), server_default=func.now())
+)
+
+
+class Scenario(Base):
+    """Класс Сценарий из UML (реализует IScenarioProtocol)"""
     __tablename__ = "scenarios"
     
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
@@ -70,7 +51,7 @@ class Scenario(Base, IScenario):
     # Дополнительные поля
     execution_order = Column(JSON, default=list)  # Порядок выполнения
     variables = Column(JSON, default=dict)        # Переменные сценария
-    metadata = Column(JSON, default=dict)         # Дополнительные метаданные
+    scenario_metadata = Column("scenario_metadata", JSON, default=dict)  # Переименовано!
     
     # Связи из UML диаграммы
     # Project "1" *-- "1..*" Scenario : содержит
@@ -102,10 +83,14 @@ class Scenario(Base, IScenario):
     # Тестовые прогоны этого сценария
     test_runs = relationship("TestRun", back_populates="scenario")
     
+    # Активы, используемые в сценарии
+    assets_used = relationship("Asset", secondary=scenario_assets,
+                             back_populates="scenarios")
+    
     def __repr__(self):
         return f"<Scenario {self.name} ({len(self.states)} states)>"
     
-    # Реализация интерфейса IScenario
+    # Реализация методов интерфейса IScenario (из UML)
     def execute(self):
         """Выполнить сценарий (метод из UML)"""
         print(f"Выполнение сценария '{self.name}'...")
@@ -201,7 +186,6 @@ class Scenario(Base, IScenario):
     
     def add_state(self, name, state_type="idle", position=None):
         """Добавить состояние (метод из UML)"""
-        from backend.models.scenario import State
         state = State(
             name=name,
             state_type=state_type,
@@ -216,7 +200,6 @@ class Scenario(Base, IScenario):
     
     def add_transition(self, source_state, target_state, condition="", priority=1):
         """Добавить переход (метод из UML)"""
-        from backend.models.scenario import Transition
         transition = Transition(
             source_state_id=source_state.id if hasattr(source_state, 'id') else source_state,
             target_state_id=target_state.id if hasattr(target_state, 'id') else target_state,
@@ -243,7 +226,8 @@ class Scenario(Base, IScenario):
             "states_count": len(self.states),
             "transitions_count": len(self.transitions),
             "objects_count": len(self.objects_3d),
-            "has_visual_script": self.visual_script is not None
+            "has_visual_script": self.visual_script is not None,
+            "metadata": self.scenario_metadata  # Используем переименованное поле
         }
     
     def get_state_graph(self):

@@ -182,7 +182,7 @@ async def client_config():
 # Подключение API роутеров
 api_prefix = "/api"
 app.include_router(auth.router, prefix=f"{api_prefix}/auth", tags=["Аутентификация"])
-app.include_router(users.router, prefix=f"{api_prefix}/users", tags=["Пользователи"])
+# app.include_router(users.router, prefix=f"{api_prefix}/users", tags=["Пользователи"])
 app.include_router(projects.router, prefix=f"{api_prefix}/projects", tags=["Проекты"])
 app.include_router(scenarios.router, prefix=f"{api_prefix}/scenarios", tags=["Сценарии"])
 app.include_router(assets.router, prefix=f"{api_prefix}/assets", tags=["Активы"])

@@ -699,7 +699,7 @@ class CSharpGenerator(CodeGenerator):
             code += f'{indent}            Name = "{state.name}",\n'
             state_type_enum = state.state_type.Replace(" ", "").Replace("-", "")
             code += f'{indent}            Type = StateType.{state_type_enum},\n'
-            code += f'{indent}            Position = new float[] {{ {(float)state.position_x}f, {(float)state.position_y}f, {(float)state.position_z}f }},\n'
+            code += f'{indent}            Position = new float[] {{ {float(state.position_x)}f, {float(state.position_y)}f, {float(state.position_z)}f }},\n'
             code += f'{indent}            Description = "{state.description or ""}",\n'
             code += f'{indent}            Properties = new Dictionary<string, object>()\n'
             code += f'{indent}        }};\n'
@@ -945,7 +945,7 @@ class CppGenerator(CodeGenerator):
             code += f'            .id = "{state.id}",\n'
             code += f'            .name = "{state.name}",\n'
             code += f'            .type = StateType::{state_type_enum},\n'
-            code += f'            .position = {{{(float)state.position_x}f, {(float)state.position_y}f, {(float)state.position_z}f}},\n'
+            code += f'            .position = {{{float(state.position_x)}f, {float(state.position_y)}f, {float(state.position_z)}f}},\n'
             code += f'            .description = "{state.description or ""}",\n'
             code += "            .properties = {}\n"
             code += "        };\n"

@@ -5,7 +5,6 @@ Asset, Object3D (реализует IInteractiveObject), AssetLibrary
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey, Integer, Float, Boolean, JSON, Table
 from sqlalchemy.orm import relationship, validates
 from sqlalchemy.sql import func
-from abc import ABC, abstractmethod
 import uuid
 import os
 
@@ -22,6 +21,7 @@ asset_library_items = Table(
     Column('tags', JSON, default=list)
 )
 
+
 class Asset(Base):
     """Класс Актив из UML"""
     __tablename__ = "assets"
@@ -34,8 +34,8 @@ class Asset(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
-    # Метаданные из UML (Map<String,String>)
-    metadata = Column(JSON, default=dict)
+    # Метаданные из UML (Map<String,String>) - ПЕРЕИМЕНОВАНО!
+    asset_metadata = Column("asset_metadata", JSON, default=dict)
     
     # Дополнительные поля
     file_size = Column(Integer, default=0)  # Размер файла в байтах
@@ -47,7 +47,7 @@ class Asset(Base):
     
     # Связи из UML диаграммы
     # Designer "1" o-- "0..*" Asset : управляет
-    uploaded_by_user = relationship("User", back_populates="uploaded_assets")
+    uploaded_by_user = relationship("User", back_populates="uploaded_assets")  # Исправлено имя связи!
     
     # Object3D "1" *-- "1" Asset : ссылается на
     object_3d = relationship("Object3D", back_populates="asset", uselist=False,
@@ -93,7 +93,7 @@ class Asset(Base):
             "file_size": self.file_size,
             "uploaded_by": self.uploaded_by,
             "created_at": self.created_at.isoformat() if self.created_at else None,
-            "metadata": self.metadata,
+            "metadata": self.asset_metadata,  # Используем переименованное поле
             "tags": self.tags,
             "is_public": self.is_public,
             "preview_url": self.preview_url,
@@ -103,7 +103,7 @@ class Asset(Base):
     
     def add_metadata(self, key, value):
         """Добавить метаданные (метод из UML)"""
-        self.metadata[key] = value
+        self.asset_metadata[key] = value
         return True
     
     def get_file_info(self):

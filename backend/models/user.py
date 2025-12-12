@@ -39,7 +39,7 @@ class User(Base):
                                    foreign_keys="Project.created_by")
     
     # Designer "1" o-- "0..*" Asset : управляет
-    uploaded_assets = relationship("Asset", back_populates="uploaded_by")
+    uploaded_assets = relationship("Asset", back_populates="uploaded_by_user")
     
     # Tester "1" o-- "0..*" TestRun : выполняет
     test_runs = relationship("TestRun", back_populates="tester")
@@ -49,7 +49,8 @@ class User(Base):
                                    back_populates="managers")
     
     # Сообщения об ошибках от тестировщика
-    reported_bugs = relationship("BugReport", back_populates="reporter")
+    reported_bugs = relationship("BugReport", back_populates="reporter", 
+                           foreign_keys="[BugReport.reporter_id]")
     
     # Утвержденные сценарии менеджером
     approved_scenarios = relationship("Scenario", secondary="scenario_approvals",

@@ -1,0 +1,198 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Вход</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="login-page">
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <i class="fas fa-vr-cardboard"></i>
+                <h1>Вход в систему</h1>
+                <p>Платформа разработки VR/AR сценариев</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">
+                        <i class="fas fa-user"></i> Имя пользователя или Email
+                    </label>
+                    <input type="text" id="username" name="username" required 
+                           placeholder="Введите имя пользователя или email">
+                    <div class="form-error" id="usernameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">
+                        <i class="fas fa-lock"></i> Пароль
+                    </label>
+                    <input type="password" id="password" name="password" required 
+                           placeholder="Введите пароль">
+                    <div class="form-error" id="passwordError"></div>
+                </div>
+                
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span>Запомнить меня</span>
+                    </label>
+                    <a href="#" class="forgot-password">Забыли пароль?</a>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-block" id="loginBtn">
+                    <i class="fas fa-sign-in-alt"></i> Войти
+                </button>
+                
+                <div class="login-divider">
+                    <span>или войти как</span>
+                </div>
+                
+                <div class="demo-users">
+                    <div class="demo-user" data-username="admin" data-password="admin123">
+                        <i class="fas fa-user-tie"></i>
+                        <span>Менеджер</span>
+                    </div>
+                    <div class="demo-user" data-username="dev_user" data-password="dev123">
+                        <i class="fas fa-laptop-code"></i>
+                        <span>Разработчик</span>
+                    </div>
+                    <div class="demo-user" data-username="design_user" data-password="design123">
+                        <i class="fas fa-paint-brush"></i>
+                        <span>Дизайнер</span>
+                    </div>
+                    <div class="demo-user" data-username="test_user" data-password="test123">
+                        <i class="fas fa-vial"></i>
+                        <span>Тестировщик</span>
+                    </div>
+                </div>
+            </form>
+            
+            <div class="login-footer">
+                <p>Нет аккаунта? <a href="/register.html">Зарегистрироваться</a></p>
+                <p><a href="/"><i class="fas fa-arrow-left"></i> Вернуться на главную</a></p>
+            </div>
+        </div>
+        
+        <div class="login-info">
+            <h2>Добро пожаловать в VR/AR Platform</h2>
+            <p>Платформа предоставляет полный набор инструментов для разработки, тестирования и генерации кода сценариев виртуальной и дополненной реальности.</p>
+            
+            <div class="info-features">
+                <div class="info-feature">
+                    <i class="fas fa-project-diagram"></i>
+                    <h4>Управление проектами</h4>
+                    <p>Создавайте и организуйте проекты VR/AR</p>
+                </div>
+                <div class="info-feature">
+                    <i class="fas fa-code-branch"></i>
+                    <h4>Визуальное программирование</h4>
+                    <p>Редактор состояний и переходов</p>
+                </div>
+                <div class="info-feature">
+                    <i class="fas fa-cube"></i>
+                    <h4>Библиотека активов</h4>
+                    <p>3D модели, текстуры, звуки и материалы</p>
+                </div>
+                <div class="info-feature">
+                    <i class="fas fa-code"></i>
+                    <h4>Генерация кода</h4>
+                    <p>Автоматическая генерация на Python, C#, C++</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const demoUsers = document.querySelectorAll('.demo-user');
+            
+            // Заполнение формы демо-пользователями
+            demoUsers.forEach(user => {
+                user.addEventListener('click', () => {
+                    const username = user.dataset.username;
+                    const password = user.dataset.password;
+                    
+                    document.getElementById('username').value = username;
+                    document.getElementById('password').value = password;
+                    
+                    // Выделяем активного демо-пользователя
+                    demoUsers.forEach(u => u.classList.remove('active'));
+                    user.classList.add('active');
+                });
+            });
+            
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                // Сброс ошибок
+                document.getElementById('usernameError').textContent = '';
+                document.getElementById('passwordError').textContent = '';
+                
+                loginBtn.disabled = true;
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+                
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        // Сохраняем данные пользователя
+                        localStorage.setItem('token', data.access_token);
+                        localStorage.setItem('user', JSON.stringify(data.user));
+                        
+                        // Перенаправляем на главную
+                        window.location.href = '/';
+                    } else {
+                        // Показываем ошибки
+                        if (data.error) {
+                            if (data.error.includes('пользователь')) {
+                                document.getElementById('usernameError').textContent = data.error;
+                            } else if (data.error.includes('пароль')) {
+                                document.getElementById('passwordError').textContent = data.error;
+                            } else {
+                                document.getElementById('usernameError').textContent = data.error;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка входа:', error);
+                    document.getElementById('usernameError').textContent = 'Ошибка подключения к серверу';
+                } finally {
+                    loginBtn.disabled = false;
+                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+                }
+            });
+            
+            // Автовход при нажатии Enter
+            form.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    form.dispatchEvent(new Event('submit'));
+                }
+            });
+        });
+    </script>
+</body>
+</html>

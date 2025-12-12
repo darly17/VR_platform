@@ -1,0 +1,254 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Проекты</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-vr-cardboard"></i>
+            <h1>VR/AR Platform</h1>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+            <a href="/projects.html" class="nav-link active"><i class="fas fa-project-diagram"></i> Проекты</a>
+            <a href="/scenario_editor.html" class="nav-link"><i class="fas fa-code-branch"></i> Сценарии</a>
+            <a href="/assets.html" class="nav-link"><i class="fas fa-cube"></i> Активы</a>
+            <a href="/testing.html" class="nav-link"><i class="fas fa-vial"></i> Тестирование</a>
+            <a href="/codegen.html" class="nav-link"><i class="fas fa-code"></i> Генерация кода</a>
+        </div>
+        <div class="nav-user" id="navUser">
+            <a href="/login.html" class="btn btn-outline">Войти</a>
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-project-diagram"></i> Управление проектами</h1>
+                <p>Создавайте и управляйте проектами виртуальной и дополненной реальности</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="createProjectBtn">
+                    <i class="fas fa-plus"></i> Создать проект
+                </button>
+                <button class="btn btn-secondary" id="refreshProjectsBtn">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+            </div>
+        </div>
+
+        <!-- Статистика проектов -->
+        <section class="stats-section">
+            <div class="stats-grid" id="projectStats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalProjects">0</h3>
+                        <p>Всего проектов</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalScenarios">0</h3>
+                        <p>Сценариев</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalAssets">0</h3>
+                        <p>Активов</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalTests">0</h3>
+                        <p>Тестов</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Поиск и фильтры -->
+        <section class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="projectSearch" placeholder="Поиск проектов...">
+                <button class="btn btn-icon" id="clearSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="filter-controls">
+                <select id="projectFilter" class="filter-select">
+                    <option value="">Все проекты</option>
+                    <option value="active">Активные</option>
+                    <option value="archived">Архивные</option>
+                    <option value="my">Мои проекты</option>
+                    <option value="managed">Управляемые мной</option>
+                </select>
+                <select id="sortProjects" class="filter-select">
+                    <option value="newest">Сначала новые</option>
+                    <option value="oldest">Сначала старые</option>
+                    <option value="name_asc">По имени (А-Я)</option>
+                    <option value="name_desc">По имени (Я-А)</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Список проектов -->
+        <section class="projects-section">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> Список проектов</h2>
+                <div class="view-controls">
+                    <button class="btn btn-icon view-btn active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="btn btn-icon view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="projects-grid" id="projectsContainer">
+                <!-- Проекты будут загружены динамически -->
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Загрузка проектов...</p>
+                </div>
+            </div>
+            
+            <div class="pagination" id="projectsPagination">
+                <!-- Пагинация будет добавлена динамически -->
+            </div>
+        </section>
+
+        <!-- Модальное окно создания проекта -->
+        <div class="modal" id="createProjectModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fas fa-plus"></i> Создание нового проекта</h2>
+                    <button class="modal-close" id="closeCreateModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="createProjectForm">
+                        <div class="form-group">
+                            <label for="projectName">
+                                <i class="fas fa-heading"></i> Название проекта
+                            </label>
+                            <input type="text" id="projectName" name="name" required 
+                                   placeholder="Введите название проекта">
+                            <div class="form-error" id="nameError"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="projectDescription">
+                                <i class="fas fa-align-left"></i> Описание проекта
+                            </label>
+                            <textarea id="projectDescription" name="description" rows="3" 
+                                      placeholder="Опишите назначение проекта"></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="projectPlatform">
+                                    <i class="fas fa-vr-cardboard"></i> Целевая платформа
+                                </label>
+                                <select id="projectPlatform" name="target_platform">
+                                    <option value="">Не указано</option>
+                                    <option value="VR">Виртуальная реальность (VR)</option>
+                                    <option value="AR">Дополненная реальность (AR)</option>
+                                    <option value="Mixed">Смешанная реальность</option>
+                                    <option value="Desktop">Десктоп</option>
+                                    <option value="Mobile">Мобильные устройства</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="projectEngine">
+                                    <i class="fas fa-cogs"></i> Игровой движок
+                                </label>
+                                <select id="projectEngine" name="engine">
+                                    <option value="">Не указано</option>
+                                    <option value="Unity">Unity</option>
+                                    <option value="Unreal">Unreal Engine</option>
+                                    <option value="Custom">Собственный движок</option>
+                                    <option value="WebXR">WebXR</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="projectTags">
+                                <i class="fas fa-tags"></i> Теги проекта
+                            </label>
+                            <input type="text" id="projectTags" name="tags" 
+                                   placeholder="Введите теги через запятую">
+                            <small>Пример: vr, education, simulation</small>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="cancelCreateProject">
+                                Отмена
+                            </button>
+                            <button type="submit" class="btn btn-primary" id="submitCreateProject">
+                                <i class="fas fa-plus"></i> Создать проект
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-vr-cardboard"></i>
+                <h3>VR/AR Platform</h3>
+                <p>Платформа разработки сценариев виртуальной и дополненной реальности</p>
+            </div>
+            <div class="footer-links">
+                <h4>Разделы</h4>
+                <a href="/">Главная</a>
+                <a href="/projects.html">Проекты</a>
+                <a href="/scenario_editor.html">Сценарии</a>
+                <a href="/assets.html">Активы</a>
+            </div>
+            <div class="footer-info">
+                <h4>Информация</h4>
+                <p>Версия: 1.0.0</p>
+                <p>API: /api/docs</p>
+                <p>© 2024 VR/AR Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/projects.js"></script>
+</body>
+</html>
