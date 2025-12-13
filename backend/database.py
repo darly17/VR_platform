@@ -89,250 +89,254 @@ def create_initial_data():
     db = SessionLocal()
     try:
         # Проверяем, есть ли уже пользователи
-        user_count = db.query(User).count()
+        if db.query(User).count() > 0:
+            print("👤 Пользователи уже существуют, пропускаем создание демо-данных")
+            return
+
+        print("👤 Создание демо-пользователей...")
+
+        # Менеджер
+        manager = User(
+            username="admin",
+            email="admin@vrar.com",
+            full_name="Администратор",
+            role=UserRole.MANAGER.value
+        )
+        manager.set_password("admin123")  # <-- ВАЖНО: хешируем пароль!
+        db.add(manager)
+
+        # Разработчик
+        developer = User(
+            username="developer",
+            email="dev@vrar.com",
+            full_name="Иван Разработчик",
+            role=UserRole.DEVELOPER.value
+        )
+        developer.set_password("dev123")
+        db.add(developer)
+
+        # Дизайнер
+        designer = User(
+            username="designer",
+            email="design@vrar.com",
+            full_name="Анна Дизайнер",
+            role=UserRole.DESIGNER.value
+        )
+        designer.set_password("design123")
+        db.add(designer)
+
+        # Тестировщик
+        tester = User(
+            username="tester",
+            email="test@vrar.com",
+            full_name="Пётр Тестировщик",
+            role=UserRole.TESTER.value
+        )
+        tester.set_password("test123")
+        db.add(tester)
+
+        db.commit()
+        print("✅ Демo-пользователи созданы (admin/admin123 и другие)")
         
-        if user_count == 0:
-            print("👥 Создание тестовых пользователей...")
-            
-            # Создаем пользователей для каждой роли
-            users = [
-                User(
-                    username="admin",
-                    email="admin@vrar.local",
-                    full_name="Администратор Системы",
-                    role=UserRole.MANAGER,
-                    hashed_password=hash_password("admin123")
-                ),
-                User(
-                    username="dev_user",
-                    email="developer@vrar.local",
-                    full_name="Иван Разработчик",
-                    role=UserRole.DEVELOPER,
-                    hashed_password=hash_password("dev123")
-                ),
-                User(
-                    username="design_user",
-                    email="designer@vrar.local",
-                    full_name="Анна Дизайнер",
-                    role=UserRole.DESIGNER,
-                    hashed_password=hash_password("design123")
-                ),
-                User(
-                    username="test_user",
-                    email="tester@vrar.local",
-                    full_name="Петр Тестировщик",
-                    role=UserRole.TESTER,
-                    hashed_password=hash_password("test123")
-                ),
-            ]
-            
-            db.add_all(users)
-            db.commit()
-            db.refresh(users[0])
-            db.refresh(users[1])
-            db.refresh(users[2])
-            db.refresh(users[3])
-            print(f"✅ Создано {len(users)} тестовых пользователя")
-            
-            # Создаем тестовый проект
-            from backend.models.project import Project as ProjectModel
-            from backend.models.scenario import Scenario as ScenarioModel, State, Transition
-            from backend.models.asset import Asset as AssetModel, Object3D, AssetLibrary
-            from backend.models.visual_script import VisualScript, Node, Connection
-            from backend.models.testing import TestRun, TestResult, Device, BugReport
-            
-            print("📁 Создание тестового проекта...")
-            
-            # Проект
-            project = ProjectModel(
-                name="Демонстрационный проект VR",
-                description="Пример проекта для обучения работе с платформой",
-                version="1.0.0",
-                created_by=users[1].id  # Разработчик
-            )
-            db.add(project)
-            db.flush()
-            
-            # Добавляем менеджера в проект
-            project.managers.append(users[0])
-            
-            # Сценарий
-            scenario = ScenarioModel(
-                name="Взаимодействие с объектом",
-                description="Базовый сценарий взаимодействия с 3D объектом",
-                project_id=project.id,
-                created_by=users[1].id
-            )
-            db.add(scenario)
-            db.flush()
-            
-            # Состояния сценария
-            states = [
-                State(
-                    name="Начальное состояние",
-                    state_type="start",
-                    position_x=0,
-                    position_y=0,
-                    position_z=0,
-                    scenario_id=scenario.id
-                ),
-                State(
-                    name="Взаимодействие",
-                    state_type="interaction",
-                    position_x=100,
-                    position_y=0,
-                    position_z=0,
-                    scenario_id=scenario.id
-                ),
-                State(
-                    name="Завершение",
-                    state_type="end",
-                    position_x=200,
-                    position_y=0,
-                    position_z=0,
-                    scenario_id=scenario.id
-                ),
-            ]
-            db.add_all(states)
-            db.flush()
-            
-            # Переходы между состояниями
-            transitions = [
-                Transition(
-                    source_state_id=states[0].id,
-                    target_state_id=states[1].id,
-                    condition="user_interaction == True",
-                    priority=1,
-                    scenario_id=scenario.id
-                ),
-                Transition(
-                    source_state_id=states[1].id,
-                    target_state_id=states[2].id,
-                    condition="interaction_completed == True",
-                    priority=1,
-                    scenario_id=scenario.id
-                ),
-            ]
-            db.add_all(transitions)
-            
-            # Тестовый актив
-            asset = AssetModel(
-                name="Коробка",
-                asset_type=AssetType.MODEL_3D.value,
-                file_path="/uploads/models/box.fbx",
-                metadata={"author": "Система", "polygons": "1200", "format": "FBX"},
-                uploaded_by=users[2].id
-            )
-            db.add(asset)
-            db.flush()
-            
-            # 3D объект
-            object_3d = Object3D(
-                name="Интерактивная коробка",
-                position_x=50,
-                position_y=20,
-                position_z=10,
-                asset_id=asset.id,
-                scenario_id=scenario.id,
-                current_state_id=states[1].id
-            )
-            db.add(object_3d)
-            
-            # Библиотека активов
-            library = AssetLibrary(
-                name="Основная библиотека",
-                description="Библиотека по умолчанию",
-                created_by=users[2].id,
-                is_system=True
-            )
-            db.add(library)
-            library.assets.append(asset)
-            
-            # Визуальный скрипт
-            visual_script = VisualScript(
-                name="Скрипт взаимодействия",
-                scenario_id=scenario.id,
-                created_by=users[1].id
-            )
-            db.add(visual_script)
-            db.flush()
-            
-            # Узлы визуального скрипта
-            nodes = [
-                Node(
-                    name="Событие взаимодействия",
-                    node_type="event",
-                    position_x=100,
-                    position_y=100,
-                    visual_script_id=visual_script.id,
-                    properties={"event_name": "on_interact"}
-                ),
-                Node(
-                    name="Проверка условия",
-                    node_type="condition",
-                    position_x=300,
-                    position_y=100,
-                    visual_script_id=visual_script.id,
-                    properties={"condition": "object_interactable == true"}
-                ),
-                Node(
-                    name="Активация анимации",
-                    node_type="action",
-                    position_x=500,
-                    position_y=100,
-                    visual_script_id=visual_script.id,
-                    properties={"action": "play_animation", "animation_name": "open_box"}
-                ),
-            ]
-            db.add_all(nodes)
-            db.flush()
-            
-            # Соединения визуального скрипта
-            connections = [
-                Connection(
-                    source_node_id=nodes[0].id,
-                    target_node_id=nodes[1].id,
-                    connection_type="execution",
-                    visual_script_id=visual_script.id
-                ),
-                Connection(
-                    source_node_id=nodes[1].id,
-                    target_node_id=nodes[2].id,
-                    connection_type="execution",
-                    visual_script_id=visual_script.id
-                ),
-            ]
-            db.add_all(connections)
-            
-            # Устройство для тестирования
-            device = Device(
-                name="VR Шлем Oculus Quest 2",
-                device_type="vr_headset",
-                manufacturer="Meta",
-                model="Quest 2",
-                serial_number="OCULUS-001",
-                capabilities=["vr_tracking", "hand_tracking", "room_scale"],
-                is_available=True
-            )
-            db.add(device)
-            
-            # Тестовый прогон
-            test_run = TestRun(
-                name="Первый тест сценария",
-                scenario_id=scenario.id,
-                project_id=project.id,
-                tester_id=users[3].id,
-                is_automated=True
-            )
-            db.add(test_run)
-            test_run.devices.append(device)
-            
-            # Утверждение сценария менеджером
-            scenario.approvers.append(users[0])  # Менеджер
-            
-            db.commit()
-            print("✅ Тестовые данные созданы")
-            
+        # Создаем тестовый проект
+        from backend.models.project import Project as ProjectModel
+        from backend.models.scenario import Scenario as ScenarioModel, State, Transition
+        from backend.models.asset import Asset as AssetModel, Object3D, AssetLibrary
+        from backend.models.visual_script import VisualScript, Node, Connection
+        from backend.models.testing import TestRun, TestResult, Device, BugReport
+        
+        print("📁 Создание тестового проекта...")
+        
+        # Проект
+        project = ProjectModel(
+            name="Демонстрационный проект VR",
+            description="Пример проекта для обучения работе с платформой",
+            version="1.0.0",
+            created_by=users[1].id  # Разработчик
+        )
+        db.add(project)
+        db.flush()
+        
+        # Добавляем менеджера в проект
+        project.managers.append(users[0])
+        
+        # Сценарий
+        scenario = ScenarioModel(
+            name="Взаимодействие с объектом",
+            description="Базовый сценарий взаимодействия с 3D объектом",
+            project_id=project.id,
+            created_by=users[1].id
+        )
+        db.add(scenario)
+        db.flush()
+        
+        # Состояния сценария
+        states = [
+            State(
+                name="Начальное состояние",
+                state_type="start",
+                position_x=0,
+                position_y=0,
+                position_z=0,
+                scenario_id=scenario.id
+            ),
+            State(
+                name="Взаимодействие",
+                state_type="interaction",
+                position_x=100,
+                position_y=0,
+                position_z=0,
+                scenario_id=scenario.id
+            ),
+            State(
+                name="Завершение",
+                state_type="end",
+                position_x=200,
+                position_y=0,
+                position_z=0,
+                scenario_id=scenario.id
+            ),
+        ]
+        db.add_all(states)
+        db.flush()
+        
+        # Переходы между состояниями
+        transitions = [
+            Transition(
+                source_state_id=states[0].id,
+                target_state_id=states[1].id,
+                condition="user_interaction == True",
+                priority=1,
+                scenario_id=scenario.id
+            ),
+            Transition(
+                source_state_id=states[1].id,
+                target_state_id=states[2].id,
+                condition="interaction_completed == True",
+                priority=1,
+                scenario_id=scenario.id
+            ),
+        ]
+        db.add_all(transitions)
+        
+        # Тестовый актив
+        asset = AssetModel(
+            name="Коробка",
+            asset_type=AssetType.MODEL_3D.value,
+            file_path="/uploads/models/box.fbx",
+            metadata={"author": "Система", "polygons": "1200", "format": "FBX"},
+            uploaded_by=users[2].id
+        )
+        db.add(asset)
+        db.flush()
+        
+        # 3D объект
+        object_3d = Object3D(
+            name="Интерактивная коробка",
+            position_x=50,
+            position_y=20,
+            position_z=10,
+            asset_id=asset.id,
+            scenario_id=scenario.id,
+            current_state_id=states[1].id
+        )
+        db.add(object_3d)
+        
+        # Библиотека активов
+        library = AssetLibrary(
+            name="Основная библиотека",
+            description="Библиотека по умолчанию",
+            created_by=users[2].id,
+            is_system=True
+        )
+        db.add(library)
+        library.assets.append(asset)
+        
+        # Визуальный скрипт
+        visual_script = VisualScript(
+            name="Скрипт взаимодействия",
+            scenario_id=scenario.id,
+            created_by=users[1].id
+        )
+        db.add(visual_script)
+        db.flush()
+        
+        # Узлы визуального скрипта
+        nodes = [
+            Node(
+                name="Событие взаимодействия",
+                node_type="event",
+                position_x=100,
+                position_y=100,
+                visual_script_id=visual_script.id,
+                properties={"event_name": "on_interact"}
+            ),
+            Node(
+                name="Проверка условия",
+                node_type="condition",
+                position_x=300,
+                position_y=100,
+                visual_script_id=visual_script.id,
+                properties={"condition": "object_interactable == true"}
+            ),
+            Node(
+                name="Активация анимации",
+                node_type="action",
+                position_x=500,
+                position_y=100,
+                visual_script_id=visual_script.id,
+                properties={"action": "play_animation", "animation_name": "open_box"}
+            ),
+        ]
+        db.add_all(nodes)
+        db.flush()
+        
+        # Соединения визуального скрипта
+        connections = [
+            Connection(
+                source_node_id=nodes[0].id,
+                target_node_id=nodes[1].id,
+                connection_type="execution",
+                visual_script_id=visual_script.id
+            ),
+            Connection(
+                source_node_id=nodes[1].id,
+                target_node_id=nodes[2].id,
+                connection_type="execution",
+                visual_script_id=visual_script.id
+            ),
+        ]
+        db.add_all(connections)
+        
+        # Устройство для тестирования
+        device = Device(
+            name="VR Шлем Oculus Quest 2",
+            device_type="vr_headset",
+            manufacturer="Meta",
+            model="Quest 2",
+            serial_number="OCULUS-001",
+            capabilities=["vr_tracking", "hand_tracking", "room_scale"],
+            is_available=True
+        )
+        db.add(device)
+        
+        # Тестовый прогон
+        test_run = TestRun(
+            name="Первый тест сценария",
+            scenario_id=scenario.id,
+            project_id=project.id,
+            tester_id=users[3].id,
+            is_automated=True
+        )
+        db.add(test_run)
+        test_run.devices.append(device)
+        
+        # Утверждение сценария менеджером
+        scenario.approvers.append(users[0])  # Менеджер
+        
+        db.commit()
+        print("✅ Тестовые данные созданы")
+        
     except Exception as e:
         db.rollback()
         print(f"⚠️  Ошибка при создании начальных данных: {e}")

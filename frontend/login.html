@@ -112,87 +112,64 @@
     <script src="/js/auth.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const form = document.getElementById('loginForm');
-            const loginBtn = document.getElementById('loginBtn');
-            const demoUsers = document.querySelectorAll('.demo-user');
-            
-            // Заполнение формы демо-пользователями
-            demoUsers.forEach(user => {
-                user.addEventListener('click', () => {
-                    const username = user.dataset.username;
-                    const password = user.dataset.password;
-                    
-                    document.getElementById('username').value = username;
-                    document.getElementById('password').value = password;
-                    
-                    // Выделяем активного демо-пользователя
-                    demoUsers.forEach(u => u.classList.remove('active'));
-                    user.classList.add('active');
-                });
+    const form = document.getElementById('loginForm');
+    const loginBtn = document.getElementById('loginBtn');
+    if (!form || !loginBtn) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+
+        if (!username || !password) {
+            document.getElementById('usernameError').textContent = 'Заполните все поля';
+            return;
+        }
+
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
+
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ username, password })
             });
-            
-            form.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                const username = document.getElementById('username').value;
-                const password = document.getElementById('password').value;
-                
-                // Сброс ошибок
-                document.getElementById('usernameError').textContent = '';
-                document.getElementById('passwordError').textContent = '';
-                
-                loginBtn.disabled = true;
-                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
-                
-                try {
-                    const response = await fetch('/api/auth/login', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            username: username,
-                            password: password
-                        })
-                    });
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {
-                        // Сохраняем данные пользователя
-                        localStorage.setItem('token', data.access_token);
-                        localStorage.setItem('user', JSON.stringify(data.user));
-                        
-                        // Перенаправляем на главную
-                        window.location.href = '/';
-                    } else {
-                        // Показываем ошибки
-                        if (data.error) {
-                            if (data.error.includes('пользователь')) {
-                                document.getElementById('usernameError').textContent = data.error;
-                            } else if (data.error.includes('пароль')) {
-                                document.getElementById('passwordError').textContent = data.error;
-                            } else {
-                                document.getElementById('usernameError').textContent = data.error;
-                            }
-                        }
-                    }
-                } catch (error) {
-                    console.error('Ошибка входа:', error);
-                    document.getElementById('usernameError').textContent = 'Ошибка подключения к серверу';
-                } finally {
-                    loginBtn.disabled = false;
-                    loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+
+            const data = await response.json();
+
+            console.log('Ответ сервера:', data);  // Проверь в консоли F12
+
+            if (response.ok && data.success) {
+                localStorage.setItem('token', data.access_token);
+                localStorage.setItem('user', JSON.stringify(data.user));
+                window.location.href = '/projects.html';  // <-- Редирект на главную панель
+            } else {
+                const errorMsg = data.detail || data.error || 'Неверный логин или пароль';
+                if (errorMsg.toLowerCase().includes('пароль')) {
+                    document.getElementById('passwordError').textContent = errorMsg;
+                } else {
+                    document.getElementById('usernameError').textContent = errorMsg;
                 }
-            });
-            
-            // Автовход при нажатии Enter
-            form.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    form.dispatchEvent(new Event('submit'));
-                }
-            });
-        });
+            }
+        } catch (error) {
+            console.error('Ошибка сети:', error);
+            document.getElementById('usernameError').textContent = 'Нет соединения с сервером';
+        } finally {
+            loginBtn.disabled = false;
+            loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Войти';
+        }
+    });
+
+    form.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            form.dispatchEvent(new Event('submit'));
+        }
+    });
+});
     </script>
 </body>
 </html>

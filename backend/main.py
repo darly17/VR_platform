@@ -14,15 +14,12 @@ from pathlib import Path
 from contextlib import asynccontextmanager
 
 from backend.config import settings
-from backend.database import get_db, get_database_info
-from backend.api import (
-    auth, projects, scenarios, 
-    assets, testing, codegen, users
-)
+from backend.database import get_db, get_database_info, init_db
+from backend.api import auth, projects, scenarios, assets, testing, codegen, users  # Импорт всех api модулей
 
-# Настройка логирования
+# Настройка логирования на DEBUG для видимости запросов в терминале
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
@@ -33,8 +30,9 @@ async def lifespan(app: FastAPI):
     Контекстный менеджер жизненного цикла приложения
     Выполняется при запуске и остановке
     """
-    # Запуск
+    # Запуск: Инициализируем DB
     logger.info("🚀 Запуск VR/AR платформы...")
+    init_db()  # Создаёт таблицы и демо-пользователей (admin/admin123)
     yield
     # Остановка
     logger.info("🛑 Остановка VR/AR платформы...")
@@ -52,7 +50,7 @@ app = FastAPI(
 # Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.CORS_ORIGINS,
+    allow_origins=["*"],  # Разрешаем все для разработки
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -60,140 +58,79 @@ app.add_middleware(
 
 app.add_middleware(GZipMiddleware, minimum_size=1000)
 
-# Middleware для логирования запросов
-@app.middleware("http")
-async def log_requests(request: Request, call_next):
-    start_time = time.time()
-    response = await call_next(request)
-    process_time = time.time() - start_time
-    
-    logger.info(
-        f"{request.method} {request.url.path} - "
-        f"Status: {response.status_code} - "
-        f"Time: {process_time:.3f}s"
-    )
-    
-    response.headers["X-Process-Time"] = str(process_time)
-    return response
+# ===== ДОБАВЬ ЭТО: Регистрация API роутеров (перед статическими файлами и catch-all) =====
+# Используем /api как базовый префикс для всех API
+app.include_router(auth.router, prefix="/api")
+app.include_router(projects.router, prefix="/api")
+app.include_router(scenarios.router, prefix="/api")
+app.include_router(assets.router, prefix="/api")
+app.include_router(testing.router, prefix="/api")
+app.include_router(codegen.router, prefix="/api")
+# app.include_router(users.router, prefix="/api")
+@app.on_event("startup")
+async def startup():
+    logger.info("Registered routes:")
+    for route in app.routes:
+        if hasattr(route, 'methods'):
+            logger.info(f"Path: {route.path}, Methods: {', '.join(route.methods)}")
+# ===== КОНЕЦ ДОБАВЛЕНИЯ =====
 
-# Обработка ошибок валидации
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    errors = []
-    for error in exc.errors():
-        errors.append({
-            "field": ".".join(str(loc) for loc in error.get("loc", [])),
-            "message": error.get("msg"),
-            "type": error.get("type"),
-        })
-    
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={
-            "success": False,
-            "error": "Ошибка валидации",
-            "details": errors,
-        },
-    )
-
-# Подключение статических файлов фронтенда
+# Путь к фронтенду
 frontend_path = Path(__file__).parent.parent / "frontend"
-if frontend_path.exists():
-    # Статические файлы (CSS, JS, изображения)
-    app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
+frontend_path.mkdir(exist_ok=True)  # Создаём если нет
+
+# Статические файлы: css, js, assets и т.д.
+app.mount("/css", StaticFiles(directory=frontend_path / "css"), name="css")
+app.mount("/js", StaticFiles(directory=frontend_path / "js"), name="js")
+app.mount("/assets", StaticFiles(directory=frontend_path / "assets"), name="assets")
+
+# Конкретные HTML-страницы (только GET)
+@app.get("/")
+async def root():
+    return FileResponse(frontend_path / "index.html")
+
+@app.get("/login.html")
+async def login():
+    return FileResponse(frontend_path / "login.html")
+
+@app.get("/projects.html")
+async def projects():
+    return FileResponse(frontend_path / "projects.html")
+
+@app.get("/dashboard.html")
+async def dashboard():
+    return FileResponse(frontend_path / "dashboard.html")
+
+@app.get("/scenario_editor.html")
+async def scenario_editor():
+    return FileResponse(frontend_path / "scenario_editor.html")
+
+@app.get("/assets.html")
+async def assets_page():
+    return FileResponse(frontend_path / "assets.html")
+
+@app.get("/testing.html")
+async def testing():
+    return FileResponse(frontend_path / "testing.html")
+
+@app.get("/codegen.html")
+async def codegen():
+    return FileResponse(frontend_path / "codegen.html")
+
+# САМЫЙ ПОСЛЕДНИЙ — catch-all только для GET и только для неизвестных путей
+@app.get("/{full_path:path}")
+async def catch_all(full_path: str):
+    possible_file = frontend_path / full_path
+    if possible_file.is_file():
+        return FileResponse(str(possible_file))
+    return FileResponse(str(frontend_path / "index.html"))
     
-    # Обслуживание HTML страниц
-    @app.get("/")
-    async def serve_index():
-        return FileResponse(str(frontend_path / "index.html"))
-    
-    @app.get("/{path:path}")
-    async def serve_frontend(path: str):
-        file_path = frontend_path / path
-        if file_path.exists() and file_path.is_file():
-            return FileResponse(str(file_path))
-        
-        html_path = frontend_path / f"{path}.html"
-        if html_path.exists():
-            return FileResponse(str(html_path))
-        
-        return FileResponse(str(frontend_path / "index.html"))
-
-# Основные API endpoints
-@app.get("/api/health")
-async def health_check():
-    """Проверка работоспособности API"""
-    return {
-        "success": True,
-        "service": settings.APP_NAME,
-        "version": settings.VERSION,
-        "status": "healthy",
-        "timestamp": time.time()
-    }
-
-@app.get("/api/status")
-async def system_status(db=Depends(get_db)):
-    """Полный статус системы"""
-    try:
-        db_info = get_database_info()
-        
-        return {
-            "success": True,
-            "system": settings.APP_NAME,
-            "environment": settings.ENVIRONMENT.value,
-            "database": db_info,
-            "endpoints": [
-                {"path": "/api/auth", "description": "Аутентификация"},
-                {"path": "/api/projects", "description": "Проекты"},
-                {"path": "/api/scenarios", "description": "Сценарии"},
-                {"path": "/api/assets", "description": "Активы"},
-                {"path": "/api/testing", "description": "Тестирование"},
-                {"path": "/api/codegen", "description": "Генерация кода"},
-            ]
-        }
-    except Exception as e:
-        logger.error(f"Ошибка получения статуса: {e}")
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"success": False, "error": str(e)}
-        )
-
-@app.get("/api/config")
-async def client_config():
-    """Конфигурация для фронтенда"""
-    return {
-        "success": True,
-        "config": {
-            "app_name": settings.APP_NAME,
-            "version": settings.VERSION,
-            "api_url": f"http://{settings.HOST}:{settings.PORT}/api",
-            "upload_max_size": settings.MAX_UPLOAD_SIZE,
-            "debug": settings.DEBUG,
-            "features": {
-                "visual_editor": True,
-                "asset_management": True,
-                "code_generation": True,
-                "testing": True,
-                "user_roles": True,
-            }
-        }
-    }
-
-# Подключение API роутеров
-api_prefix = "/api"
-app.include_router(auth.router, prefix=f"{api_prefix}/auth", tags=["Аутентификация"])
-# app.include_router(users.router, prefix=f"{api_prefix}/users", tags=["Пользователи"])
-app.include_router(projects.router, prefix=f"{api_prefix}/projects", tags=["Проекты"])
-app.include_router(scenarios.router, prefix=f"{api_prefix}/scenarios", tags=["Сценарии"])
-app.include_router(assets.router, prefix=f"{api_prefix}/assets", tags=["Активы"])
-app.include_router(testing.router, prefix=f"{api_prefix}/testing", tags=["Тестирование"])
-app.include_router(codegen.router, prefix=f"{api_prefix}/codegen", tags=["Генерация кода"])
-
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
         "backend.main:app",
         host=settings.HOST,
         port=settings.PORT,
-        reload=settings.DEBUG
+        reload=settings.DEBUG,
+        log_level="debug"  # Для детальных логов в терминале
     )

@@ -145,6 +145,7 @@
                 loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Вход...';
                 
                 try {
+                    console.log("hi")
                     const response = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: {
@@ -157,14 +158,13 @@
                     });
                     
                     const data = await response.json();
-                    
                     if (data.success) {
                         // Сохраняем данные пользователя
                         localStorage.setItem('token', data.access_token);
                         localStorage.setItem('user', JSON.stringify(data.user));
-                        
+                        console.log(localStorage)
                         // Перенаправляем на главную
-                        window.location.href = '/';
+                        //window.location.href = '/';
                     } else {
                         // Показываем ошибки
                         if (data.error) {
