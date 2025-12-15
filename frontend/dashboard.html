@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Панель управления</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-vr-cardboard"></i>
+            <h1>VR/AR Platform</h1>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard.html" class="nav-link active"><i class="fas fa-home"></i> Главная</a>
+            <a href="/projects.html" class="nav-link"><i class="fas fa-project-diagram"></i> Проекты</a>
+            <a href="/scenario_editor.html" class="nav-link"><i class="fas fa-code-branch"></i> Сценарии</a>
+            <a href="/assets.html" class="nav-link"><i class="fas fa-cube"></i> Активы</a>
+            <a href="/testing.html" class="nav-link"><i class="fas fa-vial"></i> Тестирование</a>
+            <a href="/codegen.html" class="nav-link"><i class="fas fa-code"></i> Генерация кода</a>
+        </div>
+        <div class="nav-user" id="navUser">
+            <!-- Будет заполнено скриптом -->
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <!-- Приветствие -->
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Добро пожаловать в VR/AR Platform</h2>
+                <p>Комплексная платформа для разработки, тестирования и генерации кода сценариев виртуальной и дополненной реальности</p>
+                <div class="hero-buttons">
+                    <a href="/projects.html" class="btn btn-primary">
+                        <i class="fas fa-project-diagram"></i> Мои проекты
+                    </a>
+                    <a href="/scenario_editor.html" class="btn btn-secondary">
+                        <i class="fas fa-code-branch"></i> Создать сценарий
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="placeholder-image">
+                    <i class="fas fa-vr-cardboard"></i>
+                    <p>VR/AR Development</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Статистика -->
+        <section class="stats-section">
+            <h2 class="section-title">Общая статистика</h2>
+            <div class="stats-grid" id="dashboardStats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalProjects">0</h3>
+                        <p>Проектов</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalScenarios">0</h3>
+                        <p>Сценариев</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalAssets">0</h3>
+                        <p>Активов</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalTests">0</h3>
+                        <p>Тестов</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Последние проекты -->
+        <section class="recent-projects">
+            <div class="section-header">
+                <h2><i class="fas fa-history"></i> Последние проекты</h2>
+                <a href="/projects.html" class="btn btn-outline">Все проекты</a>
+            </div>
+            <div class="projects-grid" id="recentProjects">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Загрузка проектов...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Возможности платформы -->
+        <section class="features-section">
+            <h2 class="section-title">Возможности платформы</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>Управление проектами</h3>
+                    <p>Создавайте и организуйте проекты VR/AR, управляйте версиями и участниками</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3>Визуальное программирование</h3>
+                    <p>Редактор сценариев с перетаскиванием узлов и состояний</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <h3>Библиотека активов</h3>
+                    <p>Хранилище 3D моделей, текстур, звуков и материалов</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <h3>Тестирование</h3>
+                    <p>Запуск тестовых прогонов и отслеживание результатов</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3>Генерация кода</h3>
+                    <p>Автоматическая генерация кода на Python, C#, C++</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h3>Ролевая система</h3>
+                    <p>Разделение прав для разработчиков, дизайнеров, тестировщиков и менеджеров</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-vr-cardboard"></i>
+                <h3>VR/AR Platform</h3>
+                <p>Платформа разработки сценариев виртуальной и дополненной реальности</p>
+            </div>
+            <div class="footer-links">
+                <h4>Разделы</h4>
+                <a href="/dashboard.html">Главная</a>
+                <a href="/projects.html">Проекты</a>
+                <a href="/scenario_editor.html">Сценарии</a>
+                <a href="/assets.html">Активы</a>
+                <a href="/testing.html">Тестирование</a>
+                <a href="/codegen.html">Генерация кода</a>
+            </div>
+            <div class="footer-info">
+                <h4>Информация</h4>
+                <p>Версия: 1.0.0</p>
+                <p>API: /docs</p>
+                <p>© 2024 VR/AR Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Активы</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-vr-cardboard"></i>
+            <h1>VR/AR Platform</h1>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+            <a href="/projects.html" class="nav-link"><i class="fas fa-project-diagram"></i> Проекты</a>
+            <a href="/scenario_editor.html" class="nav-link"><i class="fas fa-code-branch"></i> Сценарии</a>
+            <a href="/assets.html" class="nav-link active"><i class="fas fa-cube"></i> Активы</a>
+            <a href="/testing.html" class="nav-link"><i class="fas fa-vial"></i> Тестирование</a>
+            <a href="/codegen.html" class="nav-link"><i class="fas fa-code"></i> Генерация кода</a>
+        </div>
+        <div class="nav-user" id="navUser">
+            <!-- Будет заполнено скриптом -->
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-cube"></i> Управление активами</h1>
+                <p>Библиотека 3D моделей, текстур, звуков и материалов для VR/AR проектов</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="uploadAssetBtn">
+                    <i class="fas fa-upload"></i> Загрузить актив
+                </button>
+                <button class="btn btn-secondary" id="refreshAssetsBtn">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+            </div>
+        </div>
+
+        <!-- Статистика активов -->
+        <section class="stats-section">
+            <div class="stats-grid" id="assetsStats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalAssets">0</h3>
+                        <p>Всего активов</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-shapes"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="modelsCount">0</h3>
+                        <p>3D моделей</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="texturesCount">0</h3>
+                        <p>Текстур</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="soundsCount">0</h3>
+                        <p>Звуков</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Поиск и фильтры -->
+        <section class="filters-section">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="assetSearch" placeholder="Поиск активов...">
+                <button class="btn btn-icon" id="clearSearch">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="filter-controls">
+                <select id="assetTypeFilter" class="filter-select">
+                    <option value="">Все типы</option>
+                    <option value="model">3D Модели</option>
+                    <option value="texture">Текстуры</option>
+                    <option value="sound">Звуки</option>
+                    <option value="material">Материалы</option>
+                    <option value="animation">Анимации</option>
+                    <option value="script">Скрипты</option>
+                </select>
+                <select id="assetProjectFilter" class="filter-select">
+                    <option value="">Все проекты</option>
+                </select>
+                <select id="sortAssets" class="filter-select">
+                    <option value="newest">Сначала новые</option>
+                    <option value="oldest">Сначала старые</option>
+                    <option value="name_asc">По имени (А-Я)</option>
+                    <option value="name_desc">По имени (Я-А)</option>
+                    <option value="size_asc">По размеру (возраст)</option>
+                    <option value="size_desc">По размеру (убыв)</option>
+                </select>
+            </div>
+        </section>
+
+        <!-- Список активов -->
+        <section class="assets-section">
+            <div class="section-header">
+                <h2><i class="fas fa-list"></i> Список активов</h2>
+                <div class="view-controls">
+                    <button class="btn btn-icon view-btn active" data-view="grid">
+                        <i class="fas fa-th-large"></i>
+                    </button>
+                    <button class="btn btn-icon view-btn" data-view="list">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="assets-container" id="assetsContainer">
+                <div class="loading-spinner">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Загрузка активов...</p>
+                </div>
+            </div>
+            
+            <div class="pagination" id="assetsPagination">
+                <!-- Пагинация будет добавлена динамически -->
+            </div>
+        </section>
+
+        <!-- Информационная панель -->
+        <div class="info-panel">
+            <div class="panel">
+                <div class="panel-header">
+                    <h3 class="panel-title"><i class="fas fa-info-circle"></i> Информация</h3>
+                </div>
+                <div class="panel-body">
+                    <p>Поддерживаемые форматы:</p>
+                    <ul class="format-list">
+                        <li><strong>3D модели:</strong> .obj, .fbx, .glb, .gltf, .stl</li>
+                        <li><strong>Текстуры:</strong> .jpg, .png, .bmp, .tga, .hdr</li>
+                        <li><strong>Звуки:</strong> .mp3, .wav, .ogg, .flac</li>
+                        <li><strong>Видео:</strong> .mp4, .avi, .mov</li>
+                    </ul>
+                    <p class="warning-text"><i class="fas fa-exclamation-triangle"></i> Максимальный размер файла: 100MB</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальное окно загрузки актива -->
+    <div class="modal" id="uploadAssetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-upload"></i> Загрузка актива</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadAssetForm">
+                    <div class="form-group">
+                        <label for="assetFile"><i class="fas fa-file-upload"></i> Выберите файл</label>
+                        <div class="file-upload-area" id="fileUploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <p>Перетащите файл сюда или нажмите для выбора</p>
+                            <input type="file" id="assetFile" name="file" accept=".obj,.fbx,.glb,.gltf,.stl,.jpg,.png,.bmp,.tga,.hdr,.mp3,.wav,.ogg,.flac,.mp4,.avi,.mov" required>
+                            <div class="file-info" id="fileInfo"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assetName"><i class="fas fa-heading"></i> Название актива</label>
+                        <input type="text" id="assetName" name="name" required placeholder="Введите название">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assetDescription"><i class="fas fa-align-left"></i> Описание</label>
+                        <textarea id="assetDescription" name="description" rows="2" placeholder="Опишите актив"></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="assetType"><i class="fas fa-tag"></i> Тип актива</label>
+                            <select id="assetType" name="type" required>
+                                <option value="">Выберите тип</option>
+                                <option value="model">3D Модель</option>
+                                <option value="texture">Текстура</option>
+                                <option value="sound">Звук</option>
+                                <option value="material">Материал</option>
+                                <option value="animation">Анимация</option>
+                                <option value="script">Скрипт</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="assetProject"><i class="fas fa-project-diagram"></i> Проект</label>
+                            <select id="assetProject" name="project_id">
+                                <option value="">Общий актив</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="assetTags"><i class="fas fa-tags"></i> Теги</label>
+                        <input type="text" id="assetTags" name="tags" placeholder="Введите теги через запятую">
+                        <small>Пример: character, environment, weapon</small>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary cancel-btn">Отмена</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-upload"></i> Загрузить
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно просмотра актива -->
+    <div class="modal" id="viewAssetModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2><i class="fas fa-cube"></i> Просмотр актива</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="asset-view-container" id="assetViewContent">
+                    <!-- Контент будет заполнен динамически -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-vr-cardboard"></i>
+                <h3>VR/AR Platform</h3>
+                <p>Платформа разработки сценариев виртуальной и дополненной реальности</p>
+            </div>
+            <div class="footer-links">
+                <h4>Разделы</h4>
+                <a href="/dashboard.html">Главная</a>
+                <a href="/projects.html">Проекты</a>
+                <a href="/scenario_editor.html">Сценарии</a>
+                <a href="/assets.html">Активы</a>
+            </div>
+            <div class="footer-info">
+                <h4>Информация</h4>
+                <p>Версия: 1.0.0</p>
+                <p>API: /docs</p>
+                <p>© 2024 VR/AR Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/assets.js"></script>
+</body>
+</html>

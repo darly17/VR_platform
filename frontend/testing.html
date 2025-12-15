@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Тестирование</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-vr-cardboard"></i>
+            <h1>VR/AR Platform</h1>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+            <a href="/projects.html" class="nav-link"><i class="fas fa-project-diagram"></i> Проекты</a>
+            <a href="/scenario_editor.html" class="nav-link"><i class="fas fa-code-branch"></i> Сценарии</a>
+            <a href="/assets.html" class="nav-link"><i class="fas fa-cube"></i> Активы</a>
+            <a href="/testing.html" class="nav-link active"><i class="fas fa-vial"></i> Тестирование</a>
+            <a href="/codegen.html" class="nav-link"><i class="fas fa-code"></i> Генерация кода</a>
+        </div>
+        <div class="nav-user" id="navUser">
+            <!-- Будет заполнено скриптом -->
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-vial"></i> Тестирование сценариев</h1>
+                <p>Запуск тестовых прогонов и отслеживание результатов тестирования VR/AR сценариев</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="createTestRunBtn">
+                    <i class="fas fa-plus"></i> Новый прогон
+                </button>
+                <button class="btn btn-secondary" id="refreshTestsBtn">
+                    <i class="fas fa-sync-alt"></i> Обновить
+                </button>
+            </div>
+        </div>
+
+        <!-- Статистика тестирования -->
+        <section class="stats-section">
+            <div class="stats-grid" id="testingStats">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-vial"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="totalTestRuns">0</h3>
+                        <p>Всего прогонов</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="passedTests">0</h3>
+                        <p>Успешных</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="failedTests">0</h3>
+                        <p>Проваленных</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3 id="runningTests">0</h3>
+                        <p>В процессе</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Вкладки -->
+        <div class="tabs-section">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="testRuns">Прогоны тестов</button>
+                <button class="tab-btn" data-tab="devices">Устройства</button>
+                <button class="tab-btn" data-tab="bugReports">Багрепорты</button>
+                <button class="tab-btn" data-tab="reports">Отчеты</button>
+            </div>
+            
+            <!-- Контент вкладок -->
+            <div class="tab-content active" id="testRunsTab">
+                <!-- Фильтры -->
+                <div class="filters-section">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="testSearch" placeholder="Поиск прогонов...">
+                    </div>
+                    <div class="filter-controls">
+                        <select id="testStatusFilter" class="filter-select">
+                            <option value="">Все статусы</option>
+                            <option value="running">В процессе</option>
+                            <option value="passed">Успешно</option>
+                            <option value="failed">Провалено</option>
+                            <option value="pending">Ожидание</option>
+                            <option value="stopped">Остановлено</option>
+                        </select>
+                        <select id="testProjectFilter" class="filter-select">
+                            <option value="">Все проекты</option>
+                        </select>
+                        <select id="testScenarioFilter" class="filter-select">
+                            <option value="">Все сценарии</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Список прогонов тестов -->
+                <div class="test-runs-list" id="testRunsList">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка прогонов тестов...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="devicesTab">
+                <div class="section-header">
+                    <h2><i class="fas fa-mobile-alt"></i> Доступные устройства</h2>
+                    <button class="btn btn-primary" id="addDeviceBtn">
+                        <i class="fas fa-plus"></i> Добавить устройство
+                    </button>
+                </div>
+                
+                <div class="devices-grid" id="devicesList">
+                    <div class="device-card">
+                        <div class="device-header">
+                            <i class="fas fa-vr-cardboard"></i>
+                            <div class="device-info">
+                                <h3>Oculus Quest 2</h3>
+                                <span class="status-indicator status-active">Доступно</span>
+                            </div>
+                        </div>
+                        <div class="device-body">
+                            <p><strong>Тип:</strong> VR Headset</p>
+                            <p><strong>Производитель:</strong> Meta</p>
+                            <p><strong>ОС:</strong> Android</p>
+                            <p><strong>Подключение:</strong> Wi-Fi</p>
+                        </div>
+                        <div class="device-footer">
+                            <button class="btn btn-outline btn-sm">Подключиться</button>
+                            <button class="btn btn-outline btn-sm"><i class="fas fa-edit"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="device-card">
+                        <div class="device-header">
+                            <i class="fas fa-mobile-alt"></i>
+                            <div class="device-info">
+                                <h3>Samsung S21</h3>
+                                <span class="status-indicator status-inactive">Занято</span>
+                            </div>
+                        </div>
+                        <div class="device-body">
+                            <p><strong>Тип:</strong> AR Smartphone</p>
+                            <p><strong>Производитель:</strong> Samsung</p>
+                            <p><strong>ОС:</strong> Android 13</p>
+                            <p><strong>Подключение:</strong> USB</p>
+                        </div>
+                        <div class="device-footer">
+                            <button class="btn btn-outline btn-sm disabled">Занято</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="bugReportsTab">
+                <div class="section-header">
+                    <h2><i class="fas fa-bug"></i> Багрепорты</h2>
+                    <button class="btn btn-primary" id="createBugReportBtn">
+                        <i class="fas fa-plus"></i> Новый багрепорт
+                    </button>
+                </div>
+                
+                <div class="bug-reports-list" id="bugReportsList">
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Загрузка багрепортов...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="reportsTab">
+                <div class="section-header">
+                    <h2><i class="fas fa-chart-bar"></i> Отчеты по тестированию</h2>
+                    <div class="report-controls">
+                        <select id="reportPeriod" class="filter-select">
+                            <option value="week">За неделю</option>
+                            <option value="month">За месяц</option>
+                            <option value="quarter">За квартал</option>
+                            <option value="year">За год</option>
+                        </select>
+                        <button class="btn btn-primary" id="generateReportBtn">
+                            <i class="fas fa-download"></i> Скачать отчет
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="reports-container" id="reportsContainer">
+                    <div class="chart-container">
+                        <canvas id="testResultsChart"></canvas>
+                    </div>
+                    
+                    <div class="report-summary">
+                        <h3>Сводка по тестированию</h3>
+                        <div class="summary-stats">
+                            <div class="summary-stat">
+                                <span class="stat-label">Общее покрытие:</span>
+                                <span class="stat-value" id="coverageRate">0%</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="stat-label">Среднее время теста:</span>
+                                <span class="stat-value" id="avgTestTime">0s</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="stat-label">Критические баги:</span>
+                                <span class="stat-value" id="criticalBugs">0</span>
+                            </div>
+                            <div class="summary-stat">
+                                <span class="stat-label">Стабильность:</span>
+                                <span class="stat-value" id="stabilityScore">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальные окна -->
+    <div class="modal" id="createTestRunModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Создание тестового прогона</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createTestRunForm">
+                    <div class="form-group">
+                        <label for="testRunName">Название прогона</label>
+                        <input type="text" id="testRunName" name="name" required placeholder="Введите название">
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="testRunProject">Проект</label>
+                            <select id="testRunProject" name="project_id" required>
+                                <option value="">Выберите проект</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="testRunScenario">Сценарий</label>
+                            <select id="testRunScenario" name="scenario_id" required>
+                                <option value="">Выберите сценарий</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="testRunDevice">Устройство для тестирования</label>
+                        <select id="testRunDevice" name="device_id">
+                            <option value="">Автовыбор</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="testRunConfig">Конфигурация теста</label>
+                        <textarea id="testRunConfig" name="config" rows="3" placeholder="JSON конфигурация"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary cancel-btn">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Запустить тест</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="testRunDetailsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h2><i class="fas fa-vial"></i> Детали прогона теста</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="testRunDetailsContent">
+                    <!-- Контент будет заполнен динамически -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-vr-cardboard"></i>
+                <h3>VR/AR Platform</h3>
+                <p>Платформа разработки сценариев виртуальной и дополненной реальности</p>
+            </div>
+            <div class="footer-links">
+                <h4>Разделы</h4>
+                <a href="/dashboard.html">Главная</a>
+                <a href="/projects.html">Проекты</a>
+                <a href="/scenario_editor.html">Сценарии</a>
+                <a href="/assets.html">Активы</a>
+                <a href="/testing.html">Тестирование</a>
+                <a href="/codegen.html">Генерация кода</a>
+            </div>
+            <div class="footer-info">
+                <h4>Информация</h4>
+                <p>Версия: 1.0.0</p>
+                <p>API: /docs</p>
+                <p>© 2024 VR/AR Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Chart.js для графиков -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script src="/js/app.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/testing.js"></script>
+</body>
+</html>

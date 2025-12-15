@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Генерация кода</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Подсветка синтаксиса -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/vs.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-vr-cardboard"></i>
+            <h1>VR/AR Platform</h1>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+            <a href="/projects.html" class="nav-link"><i class="fas fa-project-diagram"></i> Проекты</a>
+            <a href="/scenario_editor.html" class="nav-link"><i class="fas fa-code-branch"></i> Сценарии</a>
+            <a href="/assets.html" class="nav-link"><i class="fas fa-cube"></i> Активы</a>
+            <a href="/testing.html" class="nav-link"><i class="fas fa-vial"></i> Тестирование</a>
+            <a href="/codegen.html" class="nav-link active"><i class="fas fa-code"></i> Генерация кода</a>
+        </div>
+        <div class="nav-user" id="navUser">
+            <!-- Будет заполнено скриптом -->
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-code"></i> Генерация кода</h1>
+                <p>Автоматическая генерация кода на различных языках программирования из визуальных сценариев</p>
+            </div>
+        </div>
+
+        <!-- Основные действия -->
+        <section class="codegen-actions">
+            <div class="action-grid">
+                <div class="action-card" data-source="scenario">
+                    <div class="action-icon">
+                        <i class="fas fa-code-branch"></i>
+                    </div>
+                    <h3>Из сценария</h3>
+                    <p>Сгенерировать код из существующего сценария</p>
+                    <button class="btn btn-primary action-btn">Выбрать сценарий</button>
+                </div>
+                
+                <div class="action-card" data-source="visual">
+                    <div class="action-icon">
+                        <i class="fas fa-project-diagram"></i>
+                    </div>
+                    <h3>Из визуального скрипта</h3>
+                    <p>Конвертировать визуальный граф в код</p>
+                    <button class="btn btn-primary action-btn">Выбрать скрипт</button>
+                </div>
+                
+                <div class="action-card" data-source="template">
+                    <div class="action-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <h3>Из шаблона</h3>
+                    <p>Создать код по шаблону проекта</p>
+                    <button class="btn btn-primary action-btn">Выбрать шаблон</button>
+                </div>
+                
+                <div class="action-card" data-source="manual">
+                    <div class="action-icon">
+                        <i class="fas fa-keyboard"></i>
+                    </div>
+                    <h3>Ручная настройка</h3>
+                    <p>Настроить параметры генерации вручную</p>
+                    <button class="btn btn-primary action-btn">Настроить</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Выбор источника и настроек -->
+        <section class="codegen-configuration">
+            <div class="config-panel">
+                <div class="config-section">
+                    <h3><i class="fas fa-cog"></i> Настройки генерации</h3>
+                    
+                    <div class="form-group">
+                        <label for="sourceType">Источник</label>
+                        <select id="sourceType" class="config-select">
+                            <option value="scenario">Сценарий</option>
+                            <option value="visual">Визуальный скрипт</option>
+                            <option value="template">Шаблон</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group source-selector" id="scenarioSource">
+                        <label for="selectedScenario">Выберите сценарий</label>
+                        <select id="selectedScenario" class="config-select">
+                            <option value="">Загрузка сценариев...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group source-selector hidden" id="visualSource">
+                        <label for="selectedVisualScript">Выберите визуальный скрипт</label>
+                        <select id="selectedVisualScript" class="config-select">
+                            <option value="">Загрузка скриптов...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group source-selector hidden" id="templateSource">
+                        <label for="selectedTemplate">Выберите шаблон</label>
+                        <select id="selectedTemplate" class="config-select">
+                            <option value="vr_basic">Базовый VR проект</option>
+                            <option value="ar_basic">Базовый AR проект</option>
+                            <option value="interaction">Интерактивный сценарий</option>
+                            <option value="gameplay">Игровая логика</option>
+                            <option value="simulation">Симуляция</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <h3><i class="fas fa-language"></i> Язык программирования</h3>
+                    
+                    <div class="language-selector">
+                        <div class="language-option active" data-language="python">
+                            <i class="fab fa-python"></i>
+                            <span>Python</span>
+                        </div>
+                        <div class="language-option" data-language="csharp">
+                            <i class="fab fa-microsoft"></i>
+                            <span>C#</span>
+                        </div>
+                        <div class="language-option" data-language="cpp">
+                            <i class="fas fa-c"></i>
+                            <span>C++</span>
+                        </div>
+                        <div class="language-option" data-language="java">
+                            <i class="fab fa-java"></i>
+                            <span>Java</span>
+                        </div>
+                        <div class="language-option" data-language="javascript">
+                            <i class="fab fa-js"></i>
+                            <span>JavaScript</span>
+                        </div>
+                    </div>
+                    
+                    <div class="language-settings">
+                        <div class="form-group">
+                            <label for="targetPlatform">Целевая платформа</label>
+                            <select id="targetPlatform" class="config-select">
+                                <option value="unity">Unity</option>
+                                <option value="unreal">Unreal Engine</option>
+                                <option value="web">Web (WebXR)</option>
+                                <option value="desktop">Desktop</option>
+                                <option value="mobile">Mobile</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="codeStyle">Стиль кода</label>
+                            <select id="codeStyle" class="config-select">
+                                <option value="standard">Стандартный</option>
+                                <option value="compact">Компактный</option>
+                                <option value="verbose">Подробный</option>
+                                <option value="commented">С комментариями</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="generationMode">Режим генерации</label>
+                            <select id="generationMode" class="config-select">
+                                <option value="full">Полный код</option>
+                                <option value="skeleton">Каркас</option>
+                                <option value="logic">Только логика</option>
+                                <option value="partial">Частичная генерация</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="config-section">
+                    <h3><i class="fas fa-sliders-h"></i> Дополнительные настройки</h3>
+                    
+                    <div class="checkbox-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeComments" checked>
+                            <span>Включать комментарии</span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeErrorHandling" checked>
+                            <span>Включать обработку ошибок</span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="includeLogging" checked>
+                            <span>Включать логирование</span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="optimizeCode" checked>
+                            <span>Оптимизировать код</span>
+                        </label>
+                        
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="generateTests">
+                            <span>Генерировать тесты</span>
+                        </label>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="outputFormat">Формат вывода</label>
+                        <select id="outputFormat" class="config-select">
+                            <option value="single">Один файл</option>
+                            <option value="multiple">Несколько файлов</option>
+                            <option value="project">Полный проект</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="namespace">Пространство имен (C#/C++)</label>
+                        <input type="text" id="namespace" placeholder="MyVRProject">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="generate-section">
+                <button class="btn btn-primary btn-large" id="generateCodeBtn">
+                    <i class="fas fa-cogs"></i> Сгенерировать код
+                </button>
+                
+                <div class="generate-status" id="generateStatus">
+                    <p>Готов к генерации кода</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Результаты генерации -->
+        <section class="codegen-results">
+            <div class="results-header">
+                <h3><i class="fas fa-file-code"></i> Сгенерированный код</h3>
+                <div class="results-actions">
+                    <button class="btn btn-outline" id="copyAllBtn">
+                        <i class="fas fa-copy"></i> Копировать все
+                    </button>
+                    <button class="btn btn-outline" id="downloadBtn">
+                        <i class="fas fa-download"></i> Скачать
+                    </button>
+                    <button class="btn btn-primary" id="validateCodeBtn">
+                        <i class="fas fa-check"></i> Проверить синтаксис
+                    </button>
+                </div>
+            </div>
+            
+            <div class="results-container">
+                <div class="code-tabs" id="codeTabs">
+                    <!-- Вкладки файлов будут добавляться динамически -->
+                </div>
+                
+                <div class="code-viewer" id="codeViewer">
+                    <pre><code class="language-python hljs" id="generatedCode">
+# Выберите источник и настройки генерации
+# Нажмите "Сгенерировать код" для создания кода
+
+# Пример сгенерированного кода:
+class VRScene:
+    def __init__(self):
+        self.states = {}
+        self.current_state = None
+    
+    def add_state(self, name, callback):
+        self.states[name] = callback
+    
+    def transition_to(self, state_name):
+        if state_name in self.states:
+            self.current_state = state_name
+            self.states[state_name]()
+    
+    def update(self):
+        if self.current_state:
+            pass  # Логика обновления текущего состояния
+
+# Генератор кода поддерживает:
+# - Автоматическую конвертацию сценариев
+# - Поддержку нескольких языков
+# - Настройку стилей и форматов
+                    </code></pre>
+                </div>
+            </div>
+            
+            <div class="code-info">
+                <div class="info-panel">
+                    <h4><i class="fas fa-info-circle"></i> Информация о коде</h4>
+                    <div class="info-content" id="codeInfo">
+                        <p><strong>Строк кода:</strong> <span id="lineCount">0</span></p>
+                        <p><strong>Файлов:</strong> <span id="fileCount">0</span></p>
+                        <p><strong>Сложность:</strong> <span id="complexity">Низкая</span></p>
+                        <p><strong>Статус:</strong> <span id="codeStatus">Не сгенерирован</span></p>
+                    </div>
+                </div>
+                
+                <div class="info-panel">
+                    <h4><i class="fas fa-exclamation-triangle"></i> Предупреждения</h4>
+                    <div class="warnings-list" id="warningsList">
+                        <p class="no-warnings">Нет предупреждений</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- История генерации -->
+        <section class="generation-history">
+            <div class="section-header">
+                <h3><i class="fas fa-history"></i> История генерации</h3>
+                <button class="btn btn-outline" id="clearHistoryBtn">
+                    <i class="fas fa-trash"></i> Очистить историю
+                </button>
+            </div>
+            
+            <div class="history-list" id="generationHistory">
+                <div class="history-item">
+                    <div class="history-info">
+                        <h4>Пример сгенерированного кода</h4>
+                        <p><i class="fas fa-code"></i> Python • <i class="fas fa-project-diagram"></i> Сценарий • 5 мин назад</p>
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-icon"><i class="fas fa-eye"></i></button>
+                        <button class="btn btn-icon"><i class="fas fa-redo"></i></button>
+                        <button class="btn btn-icon"><i class="fas fa-download"></i></button>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-vr-cardboard"></i>
+                <h3>VR/AR Platform</h3>
+                <p>Платформа разработки сценариев виртуальной и дополненной реальности</p>
+            </div>
+            <div class="footer-links">
+                <h4>Разделы</h4>
+                <a href="/dashboard.html">Главная</a>
+                <a href="/projects.html">Проекты</a>
+                <a href="/scenario_editor.html">Сценарии</a>
+                <a href="/assets.html">Активы</a>
+                <a href="/testing.html">Тестирование</a>
+                <a href="/codegen.html">Генерация кода</a>
+            </div>
+            <div class="footer-info">
+                <h4>Информация</h4>
+                <p>Версия: 1.0.0</p>
+                <p>API: /docs</p>
+                <p>© 2024 VR/AR Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Highlight.js для подсветки кода -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/languages/cpp.min.js"></script>
+    
+    <script src="/js/app.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/codegen.js"></script>
+</body>
+</html>

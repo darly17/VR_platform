@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VR/AR Platform - Редактор сценариев</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/layout.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Навигация -->
+    <nav class="navbar">
+        <div class="nav-brand">
+            <i class="fas fa-vr-cardboard"></i>
+            <h1>VR/AR Platform</h1>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/dashboard.html" class="nav-link"><i class="fas fa-home"></i> Главная</a>
+            <a href="/projects.html" class="nav-link"><i class="fas fa-project-diagram"></i> Проекты</a>
+            <a href="/scenario_editor.html" class="nav-link active"><i class="fas fa-code-branch"></i> Сценарии</a>
+            <a href="/assets.html" class="nav-link"><i class="fas fa-cube"></i> Активы</a>
+            <a href="/testing.html" class="nav-link"><i class="fas fa-vial"></i> Тестирование</a>
+            <a href="/codegen.html" class="nav-link"><i class="fas fa-code"></i> Генерация кода</a>
+        </div>
+        <div class="nav-user" id="navUser">
+            <!-- Будет заполнено скриптом -->
+        </div>
+        <button class="nav-toggle" id="navToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- Основной контент -->
+    <main class="container">
+        <div class="page-header">
+            <div class="header-content">
+                <h1><i class="fas fa-code-branch"></i> Редактор сценариев</h1>
+                <p>Визуальное программирование состояний и переходов для VR/AR сценариев</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-primary" id="saveScenarioBtn">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+                <button class="btn btn-secondary" id="runScenarioBtn">
+                    <i class="fas fa-play"></i> Запустить
+                </button>
+                <button class="btn btn-outline" id="validateScenarioBtn">
+                    <i class="fas fa-check"></i> Проверить
+                </button>
+            </div>
+        </div>
+
+        <div class="scenario-editor-container">
+            <!-- Панель инструментов -->
+            <div class="editor-toolbar">
+                <div class="toolbar-section">
+                    <h3><i class="fas fa-puzzle-piece"></i> Узлы</h3>
+                    <div class="tool-items">
+                        <div class="tool-item" draggable="true" data-type="state">
+                            <i class="fas fa-circle"></i>
+                            <span>Состояние</span>
+                        </div>
+                        <div class="tool-item" draggable="true" data-type="action">
+                            <i class="fas fa-bolt"></i>
+                            <span>Действие</span>
+                        </div>
+                        <div class="tool-item" draggable="true" data-type="condition">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Условие</span>
+                        </div>
+                        <div class="tool-item" draggable="true" data-type="event">
+                            <i class="fas fa-bell"></i>
+                            <span>Событие</span>
+                        </div>
+                        <div class="tool-item" draggable="true" data-type="start">
+                            <i class="fas fa-play"></i>
+                            <span>Старт</span>
+                        </div>
+                        <div class="tool-item" draggable="true" data-type="end">
+                            <i class="fas fa-stop"></i>
+                            <span>Конец</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="toolbar-section">
+                    <h3><i class="fas fa-sliders-h"></i> Свойства</h3>
+                    <div class="properties-panel" id="propertiesPanel">
+                        <p class="placeholder-text">Выберите узел для редактирования свойств</p>
+                    </div>
+                </div>
+
+                <div class="toolbar-section">
+                    <h3><i class="fas fa-list"></i> Сценарии проекта</h3>
+                    <div class="scenarios-list" id="scenariosList">
+                        <div class="loading-spinner small">
+                            <i class="fas fa-spinner fa-spin"></i>
+                            <p>Загрузка...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Рабочая область -->
+            <div class="editor-workspace">
+                <div class="workspace-header">
+                    <div class="workspace-info">
+                        <h3 id="scenarioTitle">Новый сценарий</h3>
+                        <div class="workspace-controls">
+                            <button class="btn btn-icon" id="zoomInBtn" title="Увеличить">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button class="btn btn-icon" id="zoomOutBtn" title="Уменьшить">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button class="btn btn-icon" id="centerViewBtn" title="Центрировать">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                            <button class="btn btn-icon" id="clearWorkspaceBtn" title="Очистить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="workspace-actions">
+                        <div class="status-indicator status-active" id="editorStatus">
+                            <span>Готов</span>
+                        </div>
+                        <div class="workspace-stats">
+                            <span>Узлов: <span id="nodeCount">0</span></span>
+                            <span>Связей: <span id="connectionCount">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="workspace-canvas" id="workspaceCanvas">
+                    <div class="canvas-grid"></div>
+                    <div class="canvas-nodes" id="canvasNodes">
+                        <!-- Узлы будут добавляться динамически -->
+                    </div>
+                    <div class="canvas-connections" id="canvasConnections">
+                        <!-- Связи будут добавляться динамически -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Панель кода -->
+        <div class="code-panel" id="codePanel">
+            <div class="code-panel-header">
+                <h3><i class="fas fa-code"></i> Генерация кода</h3>
+                <div class="code-controls">
+                    <select id="codeLanguage" class="filter-select">
+                        <option value="python">Python</option>
+                        <option value="csharp">C#</option>
+                        <option value="cpp">C++</option>
+                    </select>
+                    <button class="btn btn-primary" id="generateCodeBtn">
+                        <i class="fas fa-cogs"></i> Сгенерировать
+                    </button>
+                    <button class="btn btn-outline" id="copyCodeBtn">
+                        <i class="fas fa-copy"></i> Копировать
+                    </button>
+                </div>
+            </div>
+            <div class="code-panel-body">
+                <pre><code id="generatedCode" class="language-python"># Выберите язык и нажмите "Сгенерировать"</code></pre>
+            </div>
+        </div>
+    </main>
+
+    <!-- Модальные окна -->
+    <div class="modal" id="createScenarioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus"></i> Создание сценария</h2>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createScenarioForm">
+                    <div class="form-group">
+                        <label for="scenarioName">Название сценария</label>
+                        <input type="text" id="scenarioName" name="name" required placeholder="Введите название">
+                    </div>
+                    <div class="form-group">
+                        <label for="scenarioProject">Проект</label>
+                        <select id="scenarioProject" name="project_id" required>
+                            <option value="">Выберите проект</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="scenarioDescription">Описание</label>
+                        <textarea id="scenarioDescription" name="description" rows="3" placeholder="Опишите сценарий"></textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary cancel-btn">Отмена</button>
+                        <button type="submit" class="btn btn-primary">Создать</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Футер -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-brand">
+                <i class="fas fa-vr-cardboard"></i>
+                <h3>VR/AR Platform</h3>
+                <p>Платформа разработки сценариев виртуальной и дополненной реальности</p>
+            </div>
+            <div class="footer-links">
+                <h4>Разделы</h4>
+                <a href="/dashboard.html">Главная</a>
+                <a href="/projects.html">Проекты</a>
+                <a href="/scenario_editor.html">Сценарии</a>
+                <a href="/assets.html">Активы</a>
+            </div>
+            <div class="footer-info">
+                <h4>Информация</h4>
+                <p>Версия: 1.0.0</p>
+                <p>API: /docs</p>
+                <p>© 2024 VR/AR Platform</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="/js/app.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/scenario_editor.js"></script>
+</body>
+</html>
