@@ -92,7 +92,7 @@
                     if (response.ok && data.success) {
                         localStorage.setItem('token', data.access_token);
                         localStorage.setItem('user', JSON.stringify(data.user));
-                        window.location.href = '/projects.html';  // Редирект после успеха
+                        window.location.href = '/dashboard.html';  // Редирект после успеха
                     } else {
                         const errorMsg = data.detail || data.error || 'Неверный логин или пароль';
                         if (errorMsg.toLowerCase().includes('пароль')) {

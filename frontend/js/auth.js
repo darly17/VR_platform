@@ -18,7 +18,7 @@ function logout() {
 document.addEventListener('DOMContentLoaded', () => {
     const path = window.location.pathname;
     if (isAuthenticated() && (path === '/login.html' || path === '/')) {
-        window.location.href = '/projects.html';  // <-- Если авторизован на логине — на главную
+        window.location.href = "/dashboard.html";  // <-- Если авторизован на логине — на главную
     } else if (!isAuthenticated() && path !== '/login.html' && path !== '/') {
         window.location.href = '/login.html';  // <-- Не авторизован на других страницах — на логин
     }
