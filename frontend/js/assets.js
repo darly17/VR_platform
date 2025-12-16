@@ -1,6 +1,3 @@
-/**
- * JavaScript для управления активами
- */
 
 class AssetsManager {
     constructor() {

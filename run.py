@@ -1,16 +1,12 @@
 
-"""
-Главный скрипт запуска VR/AR платформы
-"""
 import sys
 import uvicorn
 from pathlib import Path
 
-# Добавляем корневую директорию в путь Python
 sys.path.insert(0, str(Path(__file__).parent))
 
 def print_banner():
-    """Вывод информационного баннера"""
+
     banner = """
     ╔══════════════════════════════════════════════════════════╗
     ║                VR/AR PLATFORM v1.0.0                     ║
@@ -33,22 +29,20 @@ def print_banner():
     print(banner)
 
 def main():
-    """Основная функция запуска"""
+
     try:
         print_banner()
         
-        # Инициализация базы данных
+     
         from backend.database import init_db
         init_db()
         
-        # Импорт настроек
+       
         from backend.config import settings
         
-        print(f"\n🚀 Запуск сервера...")
+        print(f"\n Запуск сервера...")
         print(f"   📍 Адрес: http://{settings.HOST}:{settings.PORT}")
-        print(f"   📖 Документация API: http://{settings.HOST}:{settings.PORT}/docs")
-        print(f"   🛠️  Режим: {'Разработка' if settings.DEBUG else 'Продакшн'}")
-        print(f"   💾 База данных: {settings.DATABASE_URL}")
+        print(f"   База данных: {settings.DATABASE_URL}")
         print("\n" + "="*60 + "\n")
         
         # Запуск сервера Uvicorn

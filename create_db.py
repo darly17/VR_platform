@@ -1,17 +1,14 @@
-#!/usr/bin/env python3
-"""
-Скрипт для создания и инициализации базы данных SQLite
-"""
+
 import sys
 from pathlib import Path
 
-# Добавляем корневую директорию в путь Python
+
 sys.path.insert(0, str(Path(__file__).parent))
 
 from backend.database import init_db, check_db_connection
 
 def main():
-    """Основная функция"""
+ 
     print("=" * 60)
     print("СОЗДАНИЕ БАЗЫ ДАННЫХ VR/AR ПЛАТФОРМЫ")
     print("=" * 60)
@@ -24,7 +21,7 @@ def main():
     if not success:
         print("Создание новой базы данных...")
     
-    # Инициализируем базу данных
+
     try:
         init_db()
         
@@ -32,7 +29,6 @@ def main():
         print("🎉 БАЗА ДАННЫХ УСПЕШНО СОЗДАНА!")
         print("=" * 60)
         
-        # Получаем информацию о созданных таблицах
         from backend.database import get_database_info
         db_info = get_database_info()
         

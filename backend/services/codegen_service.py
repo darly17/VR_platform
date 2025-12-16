@@ -1,6 +1,5 @@
 """
 Сервис генерации кода (CodeGenController + стратегии генерации)
-Соответствует UML диаграмме классов модели
 """
 
 from typing import List, Dict, Optional, Any, Protocol

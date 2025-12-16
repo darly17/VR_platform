@@ -50,9 +50,7 @@ async def generate_code_from_visual_script(
     current_user: Dict[str, Any] = Depends(get_current_user),
     db: Session = Depends(get_db)
 ) -> Dict[str, Any]:
-    """
-    Генерация кода из визуального скрипта
-    """
+    
     user_service = UserService(db)
     user = user_service.get_user(current_user["id"])
     

@@ -1,6 +1,5 @@
 """
 Сервис активов (AssetController + ObjectController)
-Соответствует UML диаграмме классов модели
 """
 
 from typing import List, Dict, Optional, Any, Tuple

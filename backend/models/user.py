@@ -1,6 +1,5 @@
 """
 Модели пользователей из UML диаграммы
-User (абстрактный) ← Developer, Designer, Tester, Manager
 """
 from sqlalchemy import Column, String, Integer, Boolean, DateTime, Enum, Text, JSON
 from sqlalchemy.orm import relationship, validates

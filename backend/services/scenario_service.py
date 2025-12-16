@@ -1,6 +1,5 @@
 """
 Сервис сценариев (ScenarioController + StateController + TransitionController)
-Соответствует UML диаграмме классов модели
 """
 
 from typing import List, Dict, Optional, Any, Tuple

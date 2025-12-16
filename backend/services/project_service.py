@@ -1,6 +1,5 @@
 """
 Сервис проектов (ProjectController)
-Соответствует UML диаграмме классов модели
 """
 
 from typing import List, Dict, Optional, Any

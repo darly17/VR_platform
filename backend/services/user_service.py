@@ -1,6 +1,5 @@
 """
 Сервис пользователей (UserController)
-Соответствует UML диаграмме классов модели
 """
 
 from typing import List, Dict, Optional, Any

@@ -15,7 +15,7 @@ from contextlib import asynccontextmanager
 
 from backend.config import settings
 from backend.database import get_db, get_database_info, init_db
-from backend.api import auth, projects, scenarios, assets, testing, codegen, users  # Импорт всех api модулей
+from backend.api import auth, projects, scenarios, assets, testing, codegen # Импорт всех api модулей
 
 # Настройка логирования на DEBUG для видимости запросов в терминале
 logging.basicConfig(
