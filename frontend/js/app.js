@@ -11,27 +11,32 @@ const VRARPlatform = {
     
     // Инициализация приложения
     init() {
-        this.loadConfig();
+        // this.loadConfig();
         this.checkAuth();
         this.setupEventListeners();
         this.setupNavigation();
         this.setupNotifications();
     },
     
-    // Загрузка конфигурации
-    async loadConfig() {
-        try {
-            const response = await fetch('/api/config');
-            const data = await response.json();
+//     // Загрузка конфигурации
+//    async loadConfig() {
+//         try {
+//             const response = await fetch('/api/config');
+//             if (!response.ok) {
+//                 throw new Error(`Ошибка HTTP: ${response.status} - ${response.statusText}`);
+//             }
+//             const data = await response.json();
             
-            if (data.success) {
-                this.config = data.config;
-                console.log('Конфигурация загружена:', this.config);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки конфигурации:', error);
-        }
-    },
+//             if (data.success) {
+//                 this.config = data.config;
+//                 console.log('Конфигурация загружена:', this.config);
+//             } else {
+//                 console.warn('Конфигурация не загружена: success=false');
+//             }
+//         } catch (error) {
+//             console.error('Ошибка загрузки конфигурации:', error);
+//         }
+//     },
     
     // Проверка аутентификации
     checkAuth() {
@@ -69,7 +74,7 @@ const VRARPlatform = {
                         <i class="fas fa-caret-down"></i>
                     </button>
                     <div class="dropdown-menu">
-                        <a href="#" class="dropdown-item" data-page="profile">
+                        <a href="#" class="dropdown-item" data-page="login">
                             <i class="fas fa-user"></i> Профиль
                         </a>
                         <a href="#" class="dropdown-item" data-page="settings">
@@ -221,7 +226,7 @@ const VRARPlatform = {
     // Навигация
     navigateTo(page) {
         const pages = {
-            'profile': '/profile.html',
+            'profile': '/login.html',
             'settings': '/settings.html',
             'projects': '/projects.html',
             'scenarios': '/scenario_editor.html',
@@ -283,6 +288,7 @@ const VRARPlatform = {
 
 // Инициализация приложения при загрузке DOM
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('app.js загружен');  // Отладка
     VRARPlatform.init();
 });
 

@@ -20,6 +20,7 @@ class ProjectsManager {
     }
     
     async init() {
+        console.log('ProjectsManager инициализирован');  // Отладка: конструктор сработал
         await this.loadProjects();
         this.setupEventListeners();
         this.setupModal();
@@ -27,67 +28,100 @@ class ProjectsManager {
     }
     
     // Загрузка проектов
+    // async loadProjects() {
+    //     try {
+    //         const container = document.getElementById('projectsContainer');
+    //         if (container) {
+    //             container.innerHTML = `
+    //                 <div class="loading-spinner">
+    //                     <i class="fas fa-spinner fa-spin"></i>
+    //                     <p>Загрузка проектов...</p>
+    //                 </div>
+    //             `;
+    //         }
+            
+    //         const params = {
+    //             limit: this.pageSize,
+    //             offset: (this.currentPage - 1) * this.pageSize
+    //         };
+            
+    //         // Добавляем фильтры
+    //         if (this.filters.search) {
+    //             params.search = this.filters.search;
+    //         }
+            
+    //         if (this.filters.status) {
+    //             params.status = this.filters.status;
+    //         }
+            
+    //         if (this.filters.sort) {
+    //             params.sort = this.filters.sort;
+    //         }
+            
+    //         const response = await API.projects.getAll(params);
+            
+    //         if (response.success) {
+    //             this.projects = response.data || response.projects || [];
+    //             this.totalProjects = response.total || response.count || this.projects.length;
+                
+    //             this.renderProjects();
+    //             this.renderPagination();
+    //         } else {
+    //             throw new Error(response.error || 'Ошибка загрузки проектов');
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка загрузки проектов:', error);
+            
+    //         const container = document.getElementById('projectsContainer');
+    //         if (container) {
+    //             container.innerHTML = `
+    //                 <div class="error-message">
+    //                     <i class="fas fa-exclamation-circle"></i>
+    //                     <p>Не удалось загрузить проекты: ${error.message}</p>
+    //                     <button class="btn btn-secondary" onclick="projectsManager.loadProjects()">
+    //                         <i class="fas fa-sync-alt"></i> Повторить
+    //                     </button>
+    //                 </div>
+    //             `;
+    //         }
+            
+    //         VRARPlatform.showNotification(`Ошибка загрузки проектов: ${error.message}`, 'error');
+    //     }
+    // }
     async loadProjects() {
         try {
+            console.log('Загрузка проектов...');  // Отладка: начало функции
+            if (typeof API === 'undefined') {
+                throw new Error('API не определён - проверьте загрузку api.js');
+            }
             const container = document.getElementById('projectsContainer');
             if (container) {
                 container.innerHTML = `
                     <div class="loading-spinner">
-                        <i class="fas fa-spinner fa-spin"></i>
-                        <p>Загрузка проектов...</p>
+                        <i class="fas fa-spinner fa-spin"></i> Загрузка проектов...
                     </div>
                 `;
-            }
-            
-            const params = {
-                limit: this.pageSize,
-                offset: (this.currentPage - 1) * this.pageSize
-            };
-            
-            // Добавляем фильтры
-            if (this.filters.search) {
-                params.search = this.filters.search;
-            }
-            
-            if (this.filters.status) {
-                params.status = this.filters.status;
-            }
-            
-            if (this.filters.sort) {
-                params.sort = this.filters.sort;
-            }
-            
-            const response = await API.projects.getAll(params);
-            
-            if (response.success) {
-                this.projects = response.data || response.projects || [];
-                this.totalProjects = response.total || response.count || this.projects.length;
                 
-                this.renderProjects();
-                this.renderPagination();
-            } else {
-                throw new Error(response.error || 'Ошибка загрузки проектов');
+                const params = new URLSearchParams(this.filters);
+                const response = await API.get(`/projects?${params.toString()}`);
+                
+                if (response.success) {
+                    this.projects = response.projects;
+                    this.totalProjects = response.total;
+                    this.renderProjects();
+                    this.renderPagination();
+                    console.log('Проекты загружены:', this.projects);  // Отладка: успех
+                } else {
+                    container.innerHTML = '<p class="error">Ошибка загрузки проектов</p>';
+                }
             }
         } catch (error) {
             console.error('Ошибка загрузки проектов:', error);
-            
             const container = document.getElementById('projectsContainer');
-            if (container) {
-                container.innerHTML = `
-                    <div class="error-message">
-                        <i class="fas fa-exclamation-circle"></i>
-                        <p>Не удалось загрузить проекты: ${error.message}</p>
-                        <button class="btn btn-secondary" onclick="projectsManager.loadProjects()">
-                            <i class="fas fa-sync-alt"></i> Повторить
-                        </button>
-                    </div>
-                `;
-            }
-            
-            VRARPlatform.showNotification(`Ошибка загрузки проектов: ${error.message}`, 'error');
+            if (container)  { container.innerHTML = '<p class="error">Ошибка: ' + error.message + '</p>';}
         }
     }
-    
+
     // Отображение проектов
     renderProjects() {
         const container = document.getElementById('projectsContainer');
@@ -512,17 +546,38 @@ class ProjectsManager {
         }
     }
     
-    // Обновление статистики
+    // // Обновление статистики
+    // async updateStats() {
+    //     try {
+    //         const response = await API.get('/status');
+    //         if (response.success && response.database && response.database.tables) {
+    //             const stats = response.database.tables;
+                
+    //             document.getElementById('totalProjects').textContent = stats.projects || 0;
+    //             document.getElementById('totalScenarios').textContent = stats.scenarios || 0;
+    //             document.getElementById('totalAssets').textContent = stats.assets || 0;
+    //             document.getElementById('totalTests').textContent = stats.test_runs || 0;
+    //         }
+    //     } catch (error) {
+    //         console.error('Ошибка загрузки статистики:', error);
+    //     }
+    // }
     async updateStats() {
         try {
-            const response = await API.get('/status');
-            if (response.success && response.database && response.database.tables) {
+            console.log('Загрузка статистики...');  // Отладка
+            if (typeof API === 'undefined') {
+                throw new Error('API не определён');
+            }
+            const response = await API.get('/database/info');
+            
+            if (response.database && response.database.tables) {
                 const stats = response.database.tables;
                 
                 document.getElementById('totalProjects').textContent = stats.projects || 0;
                 document.getElementById('totalScenarios').textContent = stats.scenarios || 0;
                 document.getElementById('totalAssets').textContent = stats.assets || 0;
                 document.getElementById('totalTests').textContent = stats.test_runs || 0;
+                console.log('Статистика загружена:', stats);  // Отладка
             }
         } catch (error) {
             console.error('Ошибка загрузки статистики:', error);
@@ -530,11 +585,13 @@ class ProjectsManager {
     }
 }
 
+
 // Создание экземпляра менеджера проектов
 let projectsManager;
 
 // Инициализация при загрузке DOM
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('projects.js загружен');  // Отладка: скрипт стартовал
     projectsManager = new ProjectsManager();
 });
 

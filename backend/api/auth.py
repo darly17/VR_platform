@@ -14,6 +14,7 @@ from backend.database import get_db
 from backend.services.user_service import UserService
 from backend.config import settings
 from backend.models.enums import UserRole
+from sqlalchemy.sql import func
 
 router = APIRouter( tags=["Аутентификация"])
 
@@ -178,32 +179,144 @@ async def register(
             detail=f"Ошибка регистрации: {str(e)}"
         )
 
-# ОСТАВЛЯЕМ ТОЛЬКО ОДИН РАБОЧИЙ ЛОГИН — тот, который использует фронтенд
+# # ОСТАВЛЯЕМ ТОЛЬКО ОДИН РАБОЧИЙ ЛОГИН — тот, который использует фронтенд
+# @router.post("/auth/login")
+# async def login(login_data: Dict[str, str] = Body(...), db: Session = Depends(get_db)):
+#     username_or_email = login_data.get("username")
+#     password = login_data.get("password")
+
+#     if not username_or_email or not password:
+#         raise HTTPException(status_code=400, detail="Неверные данные")
+
+#     user_service = UserService(db)
+#     user = user_service.get_user_by_username(username_or_email) or \
+#            user_service.get_user_by_email(username_or_email)
+
+#     if not user:
+#         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+
+#     # === ВРЕМЕННО ОТКЛЮЧАЕМ ПРОВЕРКУ ХЕША ===
+#     # Просто проверяем, что пароль == "" (или любой другой)
+#     if password == "":
+#         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+#     # ========================================
+
+#     # Создаём токен (как было)
+#     access_token = create_access_token(
+#         data={"sub": str(user.id)}
+#     )
+
+#     return {
+#         "success": True,
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "user": {
+#             "id": user.id,
+#             "username": user.username,
+#             "email": user.email,
+#             "role": user.role.value if hasattr(user.role, "value") else user.role,
+#             "full_name": user.full_name or ""
+#         }
+#     }
+
+# @router.post("/auth/login")
+# async def login(login_data: Dict[str, str] = Body(...), db: Session = Depends(get_db)):
+#     username_or_email = login_data.get("username")
+#     password = login_data.get("password")
+
+#     if not username_or_email or not password:
+#         raise HTTPException(status_code=400, detail="Неверные данные")
+
+#     user_service = UserService(db)
+#     user = user_service.get_user_by_username(username_or_email) or \
+#            user_service.get_user_by_email(username_or_email)
+
+#     if not user:
+#         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+
+#     # ИСПРАВЛЕНИЕ: используем правильную проверку пароля
+#     if not user.check_password(password):
+#         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+
+#     # Создаём токен
+#     access_token = create_access_token(
+#         data={"sub": str(user.id)}
+#     )
+
+#     return {
+#         "success": True,
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "user": {
+#             "id": user.id,
+#             "username": user.username,
+#             "email": user.email,
+#             "role": user.role.value if hasattr(user.role, "value") else user.role,
+#             "full_name": user.full_name or ""
+#         }
+#     }
+
+
+# @router.post("/auth/login")
+# async def login(login_data: Dict[str, str] = Body(...), db: Session = Depends(get_db)):
+#     username_or_email = login_data.get("username")
+#     password = login_data.get("password")
+
+#     if not username_or_email or not password:
+#         raise HTTPException(status_code=400, detail="Логин и пароль обязательны")
+
+#     user_service = UserService(db)
+#     user = user_service.get_user_by_username(username_or_email) or \
+#            user_service.get_user_by_email(username_or_email)
+
+#     if not user or not user.is_active:
+#         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+
+#     if not user.check_password(password):
+#         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+
+#     # Обновляем время последнего входа
+#     user.last_login = func.now()
+#     db.commit()
+
+#     access_token = create_access_token(data={"sub": str(user.id)})
+
+#     return {
+#         "success": True,
+#         "access_token": access_token,
+#         "token_type": "bearer",
+#         "user": {
+#             "id": user.id,
+#             "username": user.username,
+#             "email": user.email,
+#             "role": user.role.value,
+#             "full_name": user.full_name or ""
+#         }
+#     }
+
 @router.post("/auth/login")
 async def login(login_data: Dict[str, str] = Body(...), db: Session = Depends(get_db)):
     username_or_email = login_data.get("username")
     password = login_data.get("password")
 
     if not username_or_email or not password:
-        raise HTTPException(status_code=400, detail="Неверные данные")
+        raise HTTPException(status_code=400, detail="Логин и пароль обязательны")
 
     user_service = UserService(db)
     user = user_service.get_user_by_username(username_or_email) or \
            user_service.get_user_by_email(username_or_email)
 
-    if not user:
+    if not user or not user.is_active:
         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
 
-    # === ВРЕМЕННО ОТКЛЮЧАЕМ ПРОВЕРКУ ХЕША ===
-    # Просто проверяем, что пароль == "" (или любой другой)
-    if password == "":
+    if not user.check_password(password):
         raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
-    # ========================================
 
-    # Создаём токен (как было)
-    access_token = create_access_token(
-        data={"sub": str(user.id)}
-    )
+    # Теперь func доступен — обновляем время входа
+    user.last_login = func.now()
+    db.commit()
+
+    access_token = create_access_token(data={"sub": str(user.id)})
 
     return {
         "success": True,
@@ -213,7 +326,7 @@ async def login(login_data: Dict[str, str] = Body(...), db: Session = Depends(ge
             "id": user.id,
             "username": user.username,
             "email": user.email,
-            "role": user.role.value if hasattr(user.role, "value") else user.role,
+            "role": user.role.value,
             "full_name": user.full_name or ""
         }
     }
